@@ -43,8 +43,12 @@
 #   5. tapas core-libart services services.accessibility telephony-common framework ext icu4j-icudata-jarjar
 #   6. ANDROID_COMPILE_WITH_JACK=false make -j8
 #
-#   7. run this script
-#   8. Profit!
+# For including layoutlib (after completing above steps):
+#   7. tapas layoutlib
+#   8. make -j8
+#
+#   9. run this script
+#   10. Profit!
 #
 if [[ $# -eq 0 ]]; then
     echo "Usage: ${0} <android-version> <robolectric-sub-version>"
@@ -144,6 +148,7 @@ build_android_classes() {
         src=${ANDROID_SOURCES_BASE}/out/target/common/obj/JAVA_LIBRARIES/${artifact}_intermediates
         cd ${OUT}/android-all-classes; jar xf ${src}/classes.jar
     done
+    build_layout_lib
     build_tzdata
     build_jarjared_classes
     cd ${OUT}/android-all-classes; jar cf ${OUT}/${ANDROID_CLASSES} .
@@ -170,6 +175,12 @@ build_jarjared_classes() {
     cd ${OUT}/android-all-classes;
     jar xf ${OUT}/android-jarjar-workspace/okhttp-classes.jar
     jar xf ${OUT}/android-jarjar-workspace/conscrypt-classes.jar
+}
+
+build_layout_lib() {
+    echo "Robolectric: Building layoutlib..."
+    src=${ANDROID_SOURCES_BASE}/out/host/linux-x86/framework
+    cd ${OUT}/android-all-classes; jar xf ${src}/layoutlib.jar
 }
 
 build_android_all_jar() {
@@ -210,6 +221,7 @@ build_android_src_jar() {
     rsync -va ${src}/telephony/java/ ${tmp}/
     rsync -va ${src}/wifi/java/ ${tmp}/
     rsync -va ${ANDROID_SOURCES_BASE}/libcore/luni/src/main/java/ ${tmp}/ # this is new
+    rsync -va ${src}/tools/layoutlib/bridge/src/ ${tmp}/
     cd ${tmp}; jar cf ${OUT}/${ANDROID_ALL_SRC} .
     rm -rf ${tmp}
 }

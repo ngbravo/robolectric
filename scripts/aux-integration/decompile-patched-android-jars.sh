@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Decompiles the patched in android jar for development reasons
+# Decompiles the patched in android jar for development purposes
 #
 
 DIR=$(cd $(dirname "$0")/; pwd)
