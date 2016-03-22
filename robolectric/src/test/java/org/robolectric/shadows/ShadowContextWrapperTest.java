@@ -330,10 +330,10 @@ public class ShadowContextWrapperTest {
 
   @Test
   public void shouldReturnSameApplicationContextEveryTime() throws Exception {
-    Activity activity = new Activity();
+    Activity activity = Robolectric.setupActivity(Activity.class);
     assertThat(activity.getApplicationContext()).isSameAs(activity.getApplicationContext());
 
-    assertThat(activity.getApplicationContext()).isSameAs(new Activity().getApplicationContext());
+    assertThat(activity.getApplicationContext()).isSameAs(Robolectric.setupActivity(Activity.class).getApplicationContext());
   }
 
   @Test
@@ -345,10 +345,10 @@ public class ShadowContextWrapperTest {
 
   @Test
   public void shouldReturnSameContentResolverEveryTime() throws Exception {
-    Activity activity = new Activity();
+    Activity activity = Robolectric.setupActivity(Activity.class);
     assertThat(activity.getContentResolver()).isSameAs(activity.getContentResolver());
 
-    assertThat(activity.getContentResolver()).isSameAs(new Activity().getContentResolver());
+    assertThat(activity.getContentResolver()).isSameAs(Robolectric.setupActivity(Activity.class).getContentResolver());
   }
 
   @Test
@@ -372,19 +372,6 @@ public class ShadowContextWrapperTest {
     assertThat(contextWrapper.checkPermission("foo", 0, 0)).isEqualTo(PERMISSION_GRANTED);
     assertThat(contextWrapper.checkPermission("bar", 0, 0)).isEqualTo(PERMISSION_GRANTED);
     assertThat(contextWrapper.checkPermission("baz", 0, 0)).isEqualTo(PERMISSION_DENIED);
-  }
-
-  @Test
-  public void shouldReturnAContext() {
-    assertThat(contextWrapper.getBaseContext()).isNotNull();
-
-    contextWrapper = new ContextWrapper(null);
-    shadowOf(contextWrapper).callAttachBaseContext(null);
-    assertThat(contextWrapper.getBaseContext()).isNull();
-
-    Activity baseContext = new Activity();
-    shadowOf(contextWrapper).callAttachBaseContext(baseContext);
-    assertThat(contextWrapper.getBaseContext()).isSameAs(baseContext);
   }
 
   private void assertSameInstanceEveryTime(String serviceName) {
@@ -438,7 +425,7 @@ public class ShadowContextWrapperTest {
 
   @Test
   public void packageManagerShouldNotBeNullWhenWrappingAnApplication() {
-    assertThat(new Application().getPackageManager()).isNotNull();
+    assertThat(RuntimeEnvironment.application.getPackageManager()).isNotNull();
   }
 
   @Test
