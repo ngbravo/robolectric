@@ -8,6 +8,7 @@ import android.os.Looper;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.Shadows;
 import org.robolectric.ShadowsAdapter;
+import org.robolectric.fakes.RoboLayoutlibAdapter;
 import org.robolectric.manifest.AndroidManifest;
 import org.robolectric.res.ResourceLoader;
 import org.robolectric.util.Scheduler;
@@ -85,6 +86,7 @@ public class CoreShadowsAdapter implements ShadowsAdapter {
   @Override
   public void bind(Application application, AndroidManifest appManifest, ResourceLoader resourceLoader) {
     shadowOf(application).bind(appManifest, resourceLoader);
+    RoboLayoutlibAdapter.init();
   }
 
   @Override

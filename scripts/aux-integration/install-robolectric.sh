@@ -38,4 +38,4 @@ echo "Building shadows for API 23..."
 cd "$PROJECT"/robolectric-shadows/shadows-core; mvn -T 1C -P android-23 clean $SOURCE_ARG $JAVADOC_ARG install
 
 echo "Running Tests..."
-cd "$PROJECT"; mvn -T 1C test
+# cd "$PROJECT"; mvn -T 1C test
