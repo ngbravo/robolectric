@@ -7,7 +7,7 @@ DIR=$(cd $(dirname "$0")/; pwd)
 
 decompile () {
   cd $DIR
-  java -jar cfr_0_114.jar ~/.m2/repository/org/robolectric/android-all/$1/android-all-$1.jar --outputdir ./cfr-output/$1
+  java -jar cfr_0_114.jar ~/.m2/repository/org/robolectric/android-all/$1/android-all-$1.jar --outputdir ./temp/cfr-output/$1
 }
 
 cd $DIR
