@@ -5,7 +5,8 @@
 #
 set -e
 
-TEST_VERSION="5.1.1_r9-robolectric-1"
+#TEST_VERSION="5.1.1_r9-robolectric-1"
+TEST_VERSION="6.0.0_r1-robolectric-0"
 
 PROJECT=$(cd $(dirname "$0")/../..; pwd)
 # M2_REPO=$(cd ~/.m2/repository/org/robolectric; pwd)
@@ -20,22 +21,22 @@ echo "Building Robolectric..."
 cd "$PROJECT"; mvn -T 1C -D skipTests clean $SOURCE_ARG $JAVADOC_ARG install
 
 echo "Building shadows for API 16..."
-cd "$PROJECT"/robolectric-shadows/shadows-core; mvn -T 1C -P android-16 clean $SOURCE_ARG $JAVADOC_ARG install
+# cd "$PROJECT"/robolectric-shadows/shadows-core; mvn -T 1C -P android-16 clean $SOURCE_ARG $JAVADOC_ARG install
 
 echo "Building shadows for API 17..."
-cd "$PROJECT"/robolectric-shadows/shadows-core; mvn -T 1C -P android-17 clean $SOURCE_ARG $JAVADOC_ARG install
+# cd "$PROJECT"/robolectric-shadows/shadows-core; mvn -T 1C -P android-17 clean $SOURCE_ARG $JAVADOC_ARG install
 
 echo "Building shadows for API 18..."
-cd "$PROJECT"/robolectric-shadows/shadows-core; mvn -T 1C -P android-18 clean $SOURCE_ARG $JAVADOC_ARG install
+# cd "$PROJECT"/robolectric-shadows/shadows-core; mvn -T 1C -P android-18 clean $SOURCE_ARG $JAVADOC_ARG install
 
 echo "Building shadows for API 19..."
-cd "$PROJECT"/robolectric-shadows/shadows-core; mvn -T 1C -P android-19 clean $SOURCE_ARG $JAVADOC_ARG install
+# cd "$PROJECT"/robolectric-shadows/shadows-core; mvn -T 1C -P android-19 clean $SOURCE_ARG $JAVADOC_ARG install
 
 echo "Building shadows for API 21..."
-cd "$PROJECT"/robolectric-shadows/shadows-core; mvn -T 1C -P android-21 clean $SOURCE_ARG $JAVADOC_ARG install
+# cd "$PROJECT"/robolectric-shadows/shadows-core; mvn -T 1C -P android-21 clean $SOURCE_ARG $JAVADOC_ARG install
 
 echo "Building shadows for API 22..."
-cd "$PROJECT"/robolectric-shadows/shadows-core; mvn -T 1C -P android-22 clean $SOURCE_ARG $JAVADOC_ARG install
+# cd "$PROJECT"/robolectric-shadows/shadows-core; mvn -T 1C -P android-22 clean $SOURCE_ARG $JAVADOC_ARG install
 
 echo "Building shadows for API 23..."
 cd "$PROJECT"/robolectric-shadows/shadows-core; mvn -T 1C -P android-23 clean $SOURCE_ARG $JAVADOC_ARG install
@@ -61,7 +62,8 @@ echo "Patching new android-all jars in for $TEST_VERSION..."
 
 # Patch back in
 cd "$AUX_DIR"
-mvn -q install:install-file -DgroupId='org.robolectric' -DartifactId='android-all' -Dversion=$TEST_VERSION -Dfile="new-android-jars/android-all-$TEST_VERSION.jar" -Dpackaging=jar
+#mvn -q install:install-file -DgroupId='org.robolectric' -DartifactId='android-all' -Dversion=$TEST_VERSION -Dfile="new-android-jars/android-all-$TEST_VERSION.jar" -Dpackaging=jar
+#mvn -q install:install-file -DgroupId='org.robolectric' -DartifactId='android-all' -Dversion=$TEST_VERSION -Dfile="new-android-jars/android-all-$TEST_VERSION-sources.jar" -Dpackaging=jar
 
 echo "Running Tests..."
 # cd "$PROJECT"; mvn -T 1C test
