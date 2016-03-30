@@ -86,46 +86,50 @@ patch_android_all_for_version() {
 
   # zip-d commands delete, jar -uvf commands replace
 
-  zip -d android-all-$1.jar "com/google/android/maps/MapView.class"
+  remove_class_from_android-all $1 "com/google/android/maps/MapView.class"
 
-  jar -uvf android-all-$1.jar "android/view/SurfaceView.class"
-  jar -uvf android-all-$1.jar "android/view/SurfaceView\$1.class"
-  jar -uvf android-all-$1.jar "android/view/SurfaceView\$2.class"
-  jar -uvf android-all-$1.jar "android/view/SurfaceView\$3.class"
-  jar -uvf android-all-$1.jar "android/view/SurfaceView\$4.class"
-  jar -uvf android-all-$1.jar "android/view/SurfaceView\$MyWindow.class"
+  replace_class_from_android-all $1 "android/view/SurfaceView.class"
+  replace_class_from_android-all $1 "android/view/SurfaceView\$1.class"
+  replace_class_from_android-all $1 "android/view/SurfaceView\$2.class"
+  replace_class_from_android-all $1 "android/view/SurfaceView\$3.class"
+  replace_class_from_android-all $1 "android/view/SurfaceView\$4.class"
+  replace_class_from_android-all $1 "android/view/SurfaceView\$MyWindow.class"
 
-  jar -uvf android-all-$1.jar "android/webkit/WebView.class"
-  jar -uvf android-all-$1.jar "android/webkit/WebView\$1.class"
-  jar -uvf android-all-$1.jar "android/webkit/WebView\$FindListener.class"
-  jar -uvf android-all-$1.jar "android/webkit/WebView\$FindListenerDistributor.class"
-  jar -uvf android-all-$1.jar "android/webkit/WebView\$HitTestResult.class"
-  jar -uvf android-all-$1.jar "android/webkit/WebView\$PictureListener.class"
-  jar -uvf android-all-$1.jar "android/webkit/WebView\$PrivateAccess.class"
-  jar -uvf android-all-$1.jar "android/webkit/WebView\$VisualStateCallback.class"
-  jar -uvf android-all-$1.jar "android/webkit/WebView\$WebViewTransport.class"
+  replace_class_from_android-all $1 "android/webkit/WebView.class"
+  replace_class_from_android-all $1 "android/webkit/WebView\$1.class"
+  replace_class_from_android-all $1 "android/webkit/WebView\$FindListener.class"
+  replace_class_from_android-all $1 "android/webkit/WebView\$FindListenerDistributor.class"
+  replace_class_from_android-all $1 "android/webkit/WebView\$HitTestResult.class"
+  replace_class_from_android-all $1 "android/webkit/WebView\$PictureListener.class"
+  replace_class_from_android-all $1 "android/webkit/WebView\$PrivateAccess.class"
+  replace_class_from_android-all $1 "android/webkit/WebView\$VisualStateCallback.class"
+  replace_class_from_android-all $1 "android/webkit/WebView\$WebViewTransport.class"
 
-  jar -uvf android-all-$1.jar "android/view/accessibility/AccessibilityManager.class"
-  jar -uvf android-all-$1.jar "android/view/accessibility/AccessibilityManager\$1.class"
-  jar -uvf android-all-$1.jar "android/view/accessibility/AccessibilityManager\$AccessibilityStateChangeListener.class"
-  jar -uvf android-all-$1.jar "android/view/accessibility/AccessibilityManager\$HighTextContrastChangeListener.class"
-  jar -uvf android-all-$1.jar "android/view/accessibility/AccessibilityManager\$MyHandler.class"
-  jar -uvf android-all-$1.jar "android/view/accessibility/AccessibilityManager\$TouchExplorationStateChangeListener.class"
+  replace_class_from_android-all $1 "android/view/accessibility/AccessibilityManager.class"
+  replace_class_from_android-all $1 "android/view/accessibility/AccessibilityManager\$1.class"
+  replace_class_from_android-all $1 "android/view/accessibility/AccessibilityManager\$AccessibilityStateChangeListener.class"
+  replace_class_from_android-all $1 "android/view/accessibility/AccessibilityManager\$HighTextContrastChangeListener.class"
+  replace_class_from_android-all $1 "android/view/accessibility/AccessibilityManager\$MyHandler.class"
+  replace_class_from_android-all $1 "android/view/accessibility/AccessibilityManager\$TouchExplorationStateChangeListener.class"
 
-  jar -uvf android-all-$1.jar "android/os/ServiceManager.class"
+  replace_class_from_android-all $1 "android/os/ServiceManager.class"
 
-  jar -uvf android-all-$1.jar "android/util/LruCache.class"
+  replace_class_from_android-all $1 "android/util/LruCache.class"
 
-  jar -uvf android-all-$1.jar "android/content/res/TypedArray.class"
-  zip -d android-all-$1.jar "android/content/res/TypedArray_Delegate.class"
+  replace_class_from_android-all $1 "android/content/res/TypedArray.class"
+  remove_class_from_android-all $1 "android/content/res/TypedArray_Delegate.class"
 
-  jar -uvf android-all-$1.jar "android/util/Xml.class"
-  jar -uvf android-all-$1.jar "android/util/Xml\$Encoding.class"
-  jar -uvf android-all-$1.jar "android/util/Xml\$XmlSerializerFactory.class"
-  zip -d android-all-$1.jar "android/util/Xml_Delegate.class"
+  replace_class_from_android-all $1 "android/util/Xml.class"
+  replace_class_from_android-all $1 "android/util/Xml\$Encoding.class"
+  replace_class_from_android-all $1 "android/util/Xml\$XmlSerializerFactory.class"
+  remove_class_from_android-all $1 "android/util/Xml_Delegate.class"
 
-  jar -uvf android-all-$1.jar "android/content/res/Resources\$Theme.class"
-  zip -d android-all-$1.jar "android/content/res/Resources_Theme_Delegate.class"
+  replace_class_from_android-all $1 "android/content/res/Resources\$Theme.class"
+  remove_class_from_android-all $1 "android/content/res/Resources_Theme_Delegate.class"
+
+  replace_class_from_android-all $1 "android/os/Handler.class"
+  remove_class_from_android-all $1 "android/os/Handler_Delegate.class"
+
 
   # Patch new jar in
   cd "$AUX_DIR"
@@ -137,6 +141,14 @@ patch_android_all_for_version() {
 
   # Delete working directory
   rm -r temp/patching-workspace/$1
+}
+
+replace_class_from_android-all () {
+  jar -uvf android-all-$1.jar "${2}"
+}
+
+remove_class_from_android-all () {
+  zip -d android-all-$1.jar "${2}"
 }
 
 patch_cached_android_alls() {

@@ -488,6 +488,7 @@ public class ShadowActivityTest {
   @Test
   public void onKeyUp_callsOnBackPressedWhichFinishesTheActivity() throws Exception {
     OnBackPressedActivity activity = buildActivity(OnBackPressedActivity.class).setup().get();
+
     boolean downConsumed =
         activity.dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK));
     boolean upConsumed =
@@ -582,7 +583,7 @@ public class ShadowActivityTest {
     View decorView = activity.getWindow().getDecorView();
     assertThat(decorView).isNotEqualTo(null);
     ViewRootImpl root = decorView.getViewRootImpl();
-    assertThat(root).isNotEqualTo(null);
+    assertThat(root).isNotNull();
     assertThat(decorView.getWidth()).isNotEqualTo(0);
     assertThat(decorView.getHeight()).isNotEqualTo(0);
     Display display = Shadow.newInstanceOf(Display.class);

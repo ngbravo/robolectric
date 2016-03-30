@@ -19,7 +19,7 @@ public class SdkConfig {
 
   static {
     SUPPORTED_APIS = new HashMap<>();
-    // TODO: uncomment, this is for testing purposes
+    // TODO: uncomment, this hack is for testing purposes
     //addSdk(Build.VERSION_CODES.JELLY_BEAN, "4.1.2_r1", "0");
     //addSdk(Build.VERSION_CODES.JELLY_BEAN_MR1, "4.2.2_r1.2", "0");
     //addSdk(Build.VERSION_CODES.JELLY_BEAN_MR2, "4.3_r2", "0");

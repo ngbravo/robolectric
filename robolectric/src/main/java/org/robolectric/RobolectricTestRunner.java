@@ -201,6 +201,9 @@ public class RobolectricTestRunner extends BlockJUnit4ClassRunner {
   }
 
   protected boolean shouldIgnore(FrameworkMethod method, Config config) {
+    // TODO remove dev hack
+    //return method.getAnnotation(Ignore.class) != null || !getName().contains("23");
+
     return method.getAnnotation(Ignore.class) != null;
   }
 

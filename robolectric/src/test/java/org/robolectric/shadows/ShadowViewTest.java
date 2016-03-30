@@ -2,7 +2,6 @@ package org.robolectric.shadows;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
@@ -37,7 +36,6 @@ import org.robolectric.annotation.AccessibilityChecks;
 import org.robolectric.annotation.Config;
 import org.robolectric.fakes.RoboAttributeSet;
 import org.robolectric.res.Attribute;
-import org.robolectric.res.ResourceLoader;
 import org.robolectric.util.TestOnClickListener;
 import org.robolectric.util.TestOnLongClickListener;
 import org.robolectric.util.TestRunnable;
@@ -61,15 +59,11 @@ import static org.robolectric.Shadows.shadowOf;
 public class ShadowViewTest {
   private View view;
   private Transcript transcript;
-  private Resources resources;
-  private ResourceLoader resourceLoader;
 
   @Before
   public void setUp() throws Exception {
     transcript = new Transcript();
     view = new View(RuntimeEnvironment.application);
-    resources = RuntimeEnvironment.application.getResources();
-    resourceLoader = shadowOf(resources.getAssets()).getResourceLoader();
   }
 
   @Test
