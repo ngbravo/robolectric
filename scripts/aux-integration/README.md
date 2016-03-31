@@ -2,4 +2,4 @@ This directory contains auxiliary files, jars and scripts to help layoutlib inte
 
 This directory should be removed once integration is complete.
 
-You may need to grand execution permissions to the scripts with `chmod +x <file_name>`
+You may need to grant execution permissions to the scripts with `chmod +x <file_name>`

@@ -3,7 +3,6 @@ package org.robolectric.shadows;
 import android.graphics.Typeface;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -52,21 +51,18 @@ public class ShadowTypefaceTest {
   }
 
   @Test
-  @Ignore
   public void createFromFile_withFile_shouldCreateTypeface() {
     Typeface typeface = Typeface.createFromFile(fontFile);
     assertThat(typeface.getStyle()).isEqualTo(Typeface.NORMAL);
   }
 
   @Test
-  @Ignore
   public void createFromFile_withPath_shouldCreateTypeface() {
     Typeface typeface = Typeface.createFromFile(fontFile.getPath());
     assertThat(typeface.getStyle()).isEqualTo(Typeface.NORMAL);
   }
 
   @Test
-  @Ignore
   public void createFromAsset_shouldCreateTypeface() {
     Typeface typeface = Typeface.createFromAsset(RuntimeEnvironment.application.getAssets(), "libFont.ttf");
     assertThat(typeface.getStyle()).isEqualTo(Typeface.NORMAL);

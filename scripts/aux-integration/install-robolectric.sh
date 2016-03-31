@@ -130,6 +130,9 @@ patch_android_all_for_version() {
   replace_class_from_android-all $1 "android/os/Handler.class"
   remove_class_from_android-all $1 "android/os/Handler_Delegate.class"
 
+  replace_class_from_android-all $1 "android/view/View.class"
+  remove_class_from_android-all $1 "android/view/View_Delegate.class"
+
 
   # Patch new jar in
   cd "$AUX_DIR"
