@@ -8,7 +8,11 @@ import android.graphics.FontFamily_Delegate;
 public class RoboLayoutlibAdapter {
 
   public static void init() {
-    FontFamily_Delegate.setFontLocation("/tmp/fonts/");
+    setFontLocation("/tmp/fonts/");
+  }
+
+  private static void setFontLocation(String fontLocation) {
+    FontFamily_Delegate.setFontLocation(fontLocation);
   }
 
 }

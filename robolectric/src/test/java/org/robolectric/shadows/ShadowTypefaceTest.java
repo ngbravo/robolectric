@@ -12,7 +12,6 @@ import org.robolectric.manifest.AndroidManifest;
 import org.robolectric.test.TemporaryAsset;
 
 import java.io.File;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.robolectric.Shadows.shadowOf;
@@ -25,10 +24,11 @@ public class ShadowTypefaceTest {
   @Before
   public void setup() throws Exception {
     AndroidManifest appManifest = shadowOf(RuntimeEnvironment.application).getAppManifest();
-    fontFile = temporaryAsset.createFile(appManifest, "myFont.ttf", "myFontData");
+    fontFile = temporaryAsset.createClonedFontFile(appManifest, "myFont.ttf",
+        ShadowFontFamily_Delegate.getFontLocation() + "Roboto-Medium.ttf");
 
-    List<AndroidManifest> libraryManifests = appManifest.getLibraryManifests();
-    temporaryAsset.createFile(libraryManifests.get(0), "libFont.ttf", "libFontData");
+    //List<AndroidManifest> libraryManifests = appManifest.getLibraryManifests();
+    //temporaryAsset.createFile(libraryManifests.get(0), "libFont.ttf", "libFontData");
   }
 
   @Test
