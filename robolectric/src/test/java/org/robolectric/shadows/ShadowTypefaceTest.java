@@ -26,9 +26,6 @@ public class ShadowTypefaceTest {
     AndroidManifest appManifest = shadowOf(RuntimeEnvironment.application).getAppManifest();
     fontFile = temporaryAsset.createClonedFontFile(appManifest, "myFont.ttf",
         ShadowFontFamily_Delegate.getFontLocation() + "Roboto-Medium.ttf");
-
-    //List<AndroidManifest> libraryManifests = appManifest.getLibraryManifests();
-    //temporaryAsset.createFile(libraryManifests.get(0), "libFont.ttf", "libFontData");
   }
 
   @Test
@@ -64,7 +61,7 @@ public class ShadowTypefaceTest {
 
   @Test
   public void createFromAsset_shouldCreateTypeface() {
-    Typeface typeface = Typeface.createFromAsset(RuntimeEnvironment.application.getAssets(), "libFont.ttf");
+    Typeface typeface = Typeface.createFromAsset(RuntimeEnvironment.application.getAssets(), "myFont.ttf");
     assertThat(typeface.getStyle()).isEqualTo(Typeface.NORMAL);
   }
 
