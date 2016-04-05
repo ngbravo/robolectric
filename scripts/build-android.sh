@@ -180,7 +180,64 @@ build_jarjared_classes() {
 build_layout_lib() {
     echo "Robolectric: Building layoutlib..."
     src=${ANDROID_SOURCES_BASE}/out/host/linux-x86/framework
-    cd ${OUT}/android-all-classes; jar xf ${src}/layoutlib.jar
+    cd ${OUT}/android-all-classes;
+
+    # Patching layoutlib jar
+    classes_to_ignore=(
+      "com/google/android/maps/MapView.class",
+
+      "android/view/SurfaceView.class",
+      "android/view/SurfaceView\$1.class",
+      "android/view/SurfaceView\$2.class",
+      "android/view/SurfaceView\$3.class",
+      "android/view/SurfaceView\$4.class",
+      "android/view/SurfaceView\$MyWindow.class",
+
+      "android/webkit/WebView.class",
+      "android/webkit/WebView\$1.class",
+      "android/webkit/WebView\$FindListener.class",
+      "android/webkit/WebView\$FindListenerDistributor.class",
+      "android/webkit/WebView\$HitTestResult.class",
+      "android/webkit/WebView\$PictureListener.class",
+      "android/webkit/WebView\$PrivateAccess.class",
+      "android/webkit/WebView\$VisualStateCallback.class",
+      "android/webkit/WebView\$WebViewTransport.class",
+
+      "android/view/accessibility/AccessibilityManager.class",
+      "android/view/accessibility/AccessibilityManager\$1.class",
+      "android/view/accessibility/AccessibilityManager\$AccessibilityStateChangeListener.class",
+      "android/view/accessibility/AccessibilityManager\$HighTextContrastChangeListener.class",
+      "android/view/accessibility/AccessibilityManager\$MyHandler.class",
+      "android/view/accessibility/AccessibilityManager\$TouchExplorationStateChangeListener.class",
+
+      "android/os/ServiceManager.class",
+
+      "android/util/LruCache.class",
+
+      "android/content/res/TypedArray.class",
+      "android/content/res/TypedArray_Delegate.class",
+
+      "android/util/Xml.class",
+      "android/util/Xml\$Encoding.class",
+      "android/util/Xml\$XmlSerializerFactory.class",
+      "android/util/Xml_Delegate.class",
+
+      "android/content/res/Resources\$Theme.class",
+      "android/content/res/Resources_Theme_Delegate.class",
+
+      "android/os/Handler.class",
+      "android/os/Handler_Delegate.class",
+
+      "android/view/View.class",
+      "android/view/View_Delegate.class"
+    );
+
+    for class_to_ignore in "${classes_to_ignore[@]}"
+    do
+      zip -d ${src}/layoutlib.jar ${class_to_ignore}
+    done
+
+    jar xf ${src}/layoutlib.jar
 }
 
 build_android_all_jar() {
