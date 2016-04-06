@@ -50,7 +50,7 @@ public class CachedDependencyResolverTest {
   private Cache cache = new CacheStub();
   private RoboDependency[] dependencies = new RoboDependency[]{
       createDependency("group1", "artifact1", RoboDependency.Type.jar),
-      createDependency("group2", "artifact2", RoboDependency.Type.dir),
+      createDependency("group2", "artifact2", RoboDependency.Type.zip),
   };
   private RoboDependency roboDependency = dependencies[0];
 

@@ -60,7 +60,7 @@ public class SdkConfig {
   }
 
   public RoboDependency getFontsDependency() {
-    return createDependency("org.robolectric", "android-fonts", artifactVersionString, null, RoboDependency.Type.dir);
+    return createDependency("org.robolectric", "android-fonts", artifactVersionString, null, RoboDependency.Type.zip);
   }
 
   @Override

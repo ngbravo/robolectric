@@ -37,7 +37,7 @@ public class RoboDependency {
 
   public enum Type {
     jar,
-    dir
+    zip
   }
 
 }

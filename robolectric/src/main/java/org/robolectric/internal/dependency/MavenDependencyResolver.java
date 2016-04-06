@@ -33,20 +33,25 @@ public class MavenDependencyResolver implements DependencyResolver {
   public URL[] getLocalArtifactUrls(RoboDependency... dependencies) {
     DependenciesTask dependenciesTask = createDependenciesTask();
     configureMaven(dependenciesTask);
+
     RemoteRepository remoteRepository = new RemoteRepository();
     remoteRepository.setUrl(repositoryUrl);
     remoteRepository.setId(repositoryId);
+
     dependenciesTask.addConfiguredRemoteRepository(remoteRepository);
     dependenciesTask.setProject(project);
+
     for (RoboDependency roboDependency : dependencies) {
       Dependency mavenDependency = new org.apache.maven.model.Dependency();
       mavenDependency.setArtifactId(roboDependency.getArtifactId());
       mavenDependency.setGroupId(roboDependency.getGroupId());
       mavenDependency.setType(roboDependency.getType());
       mavenDependency.setVersion(roboDependency.getVersion());
+
       if (roboDependency.getClassifier() != null) {
         mavenDependency.setClassifier(roboDependency.getClassifier());
       }
+
       dependenciesTask.addDependency(mavenDependency);
     }
     dependenciesTask.execute();

@@ -24,13 +24,9 @@ public class LocalDependencyResolver implements DependencyResolver {
           .append(roboDependency.getClassifier());
     }
 
-    if (roboDependency.getType().equals(RoboDependency.Type.dir.toString())) {
-      filenameBuilder.append("/");
-    }
-    else {
-      filenameBuilder.append(".")
-          .append(roboDependency.getType());
-    }
+    filenameBuilder.append(".")
+        .append(roboDependency.getType());
+
 
     return fileToUrl(validateFile(new File(offlineJarDir, filenameBuilder.toString())));
   }

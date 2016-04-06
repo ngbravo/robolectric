@@ -123,12 +123,9 @@ public class RobolectricTestRunner extends BlockJUnit4ClassRunner {
   protected DependencyResolver getDependencyResolver() {
     if (dependencyResolver == null) {
 
-      // todo remove hack
-      if (Boolean.getBoolean("robolectric.offline") || true) {
+      if (Boolean.getBoolean("robolectric.offline")) {
         String dependencyDir = System.getProperty("robolectric.dependency.dir", ".");
 
-        // todo remove hack. Manually set dependency directory to run
-        dependencyDir = "";
         dependencyResolver = new LocalDependencyResolver(new File(dependencyDir));
       } else {
         File cacheDir = new File(new File(System.getProperty("java.io.tmpdir")), "robolectric");
