@@ -32,7 +32,7 @@ public class CachedDependencyResolver implements DependencyResolver {
   }
 
   @Override
-  public URL[] getLocalArtifactUrls(DependencyJar... dependencies) {
+  public URL[] getLocalArtifactUrls(RoboDependency... dependencies) {
     final String cacheName = cacheNamingStrategy.getName(CACHE_PREFIX_1, dependencies);
     final URL[] urlsFromCache = cache.load(cacheName, URL[].class);
 
@@ -46,21 +46,21 @@ public class CachedDependencyResolver implements DependencyResolver {
   }
 
   @Override
-  public URL getLocalArtifactUrl(DependencyJar dependency) {
-    final String cacheName = cacheNamingStrategy.getName(CACHE_PREFIX_2, dependency);
+  public URL getLocalArtifactUrl(RoboDependency roboDependency) {
+    final String cacheName = cacheNamingStrategy.getName(CACHE_PREFIX_2, roboDependency);
     final URL urlFromCache = cache.load(cacheName, URL.class);
 
     if (urlFromCache != null && cacheValidationStrategy.isValid(urlFromCache)) {
       return urlFromCache;
     }
 
-    final URL url = dependencyResolver.getLocalArtifactUrl(dependency);
+    final URL url = dependencyResolver.getLocalArtifactUrl(roboDependency);
     cache.write(cacheName, url);
     return url;
   }
 
   interface CacheNamingStrategy {
-    String getName(String prefix, DependencyJar... dependencies);
+    String getName(String prefix, RoboDependency... dependencies);
   }
 
   interface CacheValidationStrategy {
@@ -87,18 +87,18 @@ public class CachedDependencyResolver implements DependencyResolver {
   }
 
   static class DefaultCacheNamingStrategy implements CacheNamingStrategy {
-    public String getName(String prefix, DependencyJar... dependencies) {
+    public String getName(String prefix, RoboDependency... dependencies) {
       StringBuilder sb = new StringBuilder();
 
       sb.append(prefix)
           .append("#");
 
-      for (DependencyJar dependency : dependencies) {
-        sb.append(dependency.getGroupId())
+      for (RoboDependency roboDependency : dependencies) {
+        sb.append(roboDependency.getGroupId())
             .append(":")
-            .append(dependency.getArtifactId())
+            .append(roboDependency.getArtifactId())
             .append(":")
-            .append(dependency.getVersion())
+            .append(roboDependency.getVersion())
             .append(",");
       }
 

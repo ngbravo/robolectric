@@ -1,16 +1,18 @@
 package org.robolectric.internal.dependency;
 
-public class DependencyJar {
+public class RoboDependency {
   private final String groupId;
   private final String artifactId;
   private final String version;
   private final String classifier;
+  private final Type type;
 
-  public DependencyJar(String groupId, String artifactId, String version, String classifier) {
+  public RoboDependency(String groupId, String artifactId, String version, String classifier, Type type) {
     this.groupId = groupId;
     this.artifactId = artifactId;
     this.version = version;
     this.classifier = classifier;
+    this.type = type;
   }
 
   public String getGroupId() {
@@ -26,10 +28,16 @@ public class DependencyJar {
   }
 
   public String getType() {
-    return "jar";
+    return type.toString();
   }
 
   public String getClassifier() {
     return classifier;
   }
+
+  public enum Type {
+    jar,
+    dir
+  }
+
 }

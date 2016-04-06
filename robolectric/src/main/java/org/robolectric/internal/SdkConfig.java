@@ -1,7 +1,7 @@
 package org.robolectric.internal;
 
 import android.os.Build;
-import org.robolectric.internal.dependency.DependencyJar;
+import org.robolectric.internal.dependency.RoboDependency;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -51,12 +51,16 @@ public class SdkConfig {
     return apiLevel;
   }
 
-  public DependencyJar getAndroidSdkDependency() {
-    return createDependency("org.robolectric", "android-all", artifactVersionString, null);
+  public RoboDependency getAndroidSdkDependency() {
+    return createDependency("org.robolectric", "android-all", artifactVersionString, null, RoboDependency.Type.jar);
   }
 
-  public DependencyJar getCoreShadowsDependency() {
-    return createDependency("org.robolectric", "shadows-core", ROBOLECTRIC_VERSION, Integer.toString(apiLevel));
+  public RoboDependency getCoreShadowsDependency() {
+    return createDependency("org.robolectric", "shadows-core", ROBOLECTRIC_VERSION, Integer.toString(apiLevel), RoboDependency.Type.jar);
+  }
+
+  public RoboDependency getFontsDependency() {
+    return createDependency("org.robolectric", "android-fonts", artifactVersionString, null, RoboDependency.Type.dir);
   }
 
   @Override
@@ -77,8 +81,8 @@ public class SdkConfig {
     return artifactVersionString.hashCode();
   }
 
-  private DependencyJar createDependency(String groupId, String artifactId, String version, String classifier) {
-    return new DependencyJar(groupId, artifactId, version, classifier);
+  private RoboDependency createDependency(String groupId, String artifactId, String version, String classifier, RoboDependency.Type type) {
+    return new RoboDependency(groupId, artifactId, version, classifier, type);
   }
 
   private static String getRobolectricVersion() {

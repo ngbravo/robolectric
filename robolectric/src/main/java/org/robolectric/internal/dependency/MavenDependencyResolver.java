@@ -30,7 +30,7 @@ public class MavenDependencyResolver implements DependencyResolver {
    * same as the input order of dependencies, i.e., urls[i] is the local artifact URL for dependencies[i].
    */
   @Override
-  public URL[] getLocalArtifactUrls(DependencyJar... dependencies) {
+  public URL[] getLocalArtifactUrls(RoboDependency... dependencies) {
     DependenciesTask dependenciesTask = createDependenciesTask();
     configureMaven(dependenciesTask);
     RemoteRepository remoteRepository = new RemoteRepository();
@@ -38,16 +38,16 @@ public class MavenDependencyResolver implements DependencyResolver {
     remoteRepository.setId(repositoryId);
     dependenciesTask.addConfiguredRemoteRepository(remoteRepository);
     dependenciesTask.setProject(project);
-    for (DependencyJar dependencyJar : dependencies) {
-      Dependency dependency = new Dependency();
-      dependency.setArtifactId(dependencyJar.getArtifactId());
-      dependency.setGroupId(dependencyJar.getGroupId());
-      dependency.setType(dependencyJar.getType());
-      dependency.setVersion(dependencyJar.getVersion());
-      if (dependencyJar.getClassifier() != null) {
-        dependency.setClassifier(dependencyJar.getClassifier());
+    for (RoboDependency roboDependency : dependencies) {
+      Dependency mavenDependency = new org.apache.maven.model.Dependency();
+      mavenDependency.setArtifactId(roboDependency.getArtifactId());
+      mavenDependency.setGroupId(roboDependency.getGroupId());
+      mavenDependency.setType(roboDependency.getType());
+      mavenDependency.setVersion(roboDependency.getVersion());
+      if (roboDependency.getClassifier() != null) {
+        mavenDependency.setClassifier(roboDependency.getClassifier());
       }
-      dependenciesTask.addDependency(dependency);
+      dependenciesTask.addDependency(mavenDependency);
     }
     dependenciesTask.execute();
 
@@ -65,18 +65,18 @@ public class MavenDependencyResolver implements DependencyResolver {
   }
 
   @Override
-  public URL getLocalArtifactUrl(DependencyJar dependency) {
-    URL[] urls = getLocalArtifactUrls(dependency);
+  public URL getLocalArtifactUrl(RoboDependency roboDependency) {
+    URL[] urls = getLocalArtifactUrls(roboDependency);
     if (urls.length > 0) {
       return urls[0];
     }
     return null;
   }
 
-  private String key(DependencyJar dependency) {
-    String key = dependency.getGroupId() + ":" + dependency.getArtifactId() + ":" + dependency.getType();
-    if(dependency.getClassifier() != null) {
-      key += ":" + dependency.getClassifier();
+  private String key(RoboDependency roboDependency) {
+    String key = roboDependency.getGroupId() + ":" + roboDependency.getArtifactId() + ":" + roboDependency.getType();
+    if(roboDependency.getClassifier() != null) {
+      key += ":" + roboDependency.getClassifier();
     }
     return key;
   }

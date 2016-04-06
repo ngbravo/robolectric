@@ -84,9 +84,9 @@ public class CoreShadowsAdapter implements ShadowsAdapter {
   }
 
   @Override
-  public void bind(Application application, AndroidManifest appManifest, ResourceLoader resourceLoader) {
+  public void bind(Application application, AndroidManifest appManifest, ResourceLoader resourceLoader, String fontsDir) {
     shadowOf(application).bind(appManifest, resourceLoader);
-    RoboLayoutlibAdapter.init();
+    RoboLayoutlibAdapter.init(fontsDir);
   }
 
   @Override

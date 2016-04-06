@@ -13,7 +13,7 @@ import org.robolectric.annotation.RealObject;
 import org.robolectric.annotation.internal.DoNotInstrument;
 import org.robolectric.annotation.internal.Instrument;
 import org.robolectric.internal.*;
-import org.robolectric.internal.dependency.DependencyJar;
+import org.robolectric.internal.dependency.RoboDependency;
 import org.robolectric.internal.fakes.RoboCharsets;
 import org.robolectric.internal.fakes.RoboExtendedResponseCache;
 import org.robolectric.internal.fakes.RoboResponseSource;
@@ -124,7 +124,7 @@ public class InstrumentationConfiguration {
           Config.class,
           Transcript.class,
           DirectObjectMarker.class,
-          DependencyJar.class,
+          RoboDependency.class,
           ParallelUniverseInterface.class,
           ShadowedObject.class,
           TempDirectory.class

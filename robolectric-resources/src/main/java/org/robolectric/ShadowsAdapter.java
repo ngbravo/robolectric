@@ -30,7 +30,7 @@ public interface ShadowsAdapter {
 
   void overrideQualifiers(Configuration configuration, String qualifiers);
 
-  void bind(Application application, AndroidManifest appManifest, ResourceLoader resourceLoader);
+  void bind(Application application, AndroidManifest appManifest, ResourceLoader resourceLoader, String fontsDir);
 
   void setAssetsQualifiers(AssetManager assets, String qualifiers);
 

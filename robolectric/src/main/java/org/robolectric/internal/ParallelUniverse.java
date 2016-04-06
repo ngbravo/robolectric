@@ -137,7 +137,9 @@ public class ParallelUniverse implements ParallelUniverseInterface {
           ClassParameter.from(compatibilityInfoClass, null),
           ClassParameter.from(int.class, Context.CONTEXT_INCLUDE_CODE));
 
-      shadowsAdapter.bind(application, appManifest, resourceLoader);
+      String fontsDir = robolectricTestRunner.getLocalDependencyArtifactUrl(sdkConfig.getFontsDependency()).toString();
+
+      shadowsAdapter.bind(application, appManifest, resourceLoader, fontsDir);
 
       try {
         Context contextImpl = systemContextImpl.createPackageContext(applicationInfo.packageName, Context.CONTEXT_INCLUDE_CODE);

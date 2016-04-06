@@ -1,11 +1,5 @@
 package org.robolectric.internal.dependency;
 
-import java.io.Serializable;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -15,8 +9,19 @@ import org.robolectric.internal.dependency.CachedDependencyResolver.CacheNamingS
 import org.robolectric.internal.dependency.CachedDependencyResolver.CacheValidationStrategy;
 import org.robolectric.test.TemporaryFolder;
 
-import static org.mockito.Mockito.*;
-import static org.junit.Assert.*;
+import java.io.Serializable;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class CachedDependencyResolverTest {
   @Rule public TemporaryFolder temporaryFolder = new TemporaryFolder();
@@ -24,7 +29,7 @@ public class CachedDependencyResolverTest {
   private DependencyResolver internalResolver = mock(DependencyResolver.class);
   private CacheNamingStrategy cacheNamingStrategy = new CacheNamingStrategy() {
     @Override
-    public String getName(String prefix, DependencyJar... dependencies) {
+    public String getName(String prefix, RoboDependency... dependencies) {
       return CACHE_NAME;
     }
   };
@@ -43,11 +48,11 @@ public class CachedDependencyResolverTest {
   private URL url;
   private URL[] urls;
   private Cache cache = new CacheStub();
-  private DependencyJar[] dependencies = new DependencyJar[]{
-      createDependency("group1", "artifact1"),
-      createDependency("group2", "artifact2"),
+  private RoboDependency[] dependencies = new RoboDependency[]{
+      createDependency("group1", "artifact1", RoboDependency.Type.jar),
+      createDependency("group2", "artifact2", RoboDependency.Type.dir),
   };
-  private DependencyJar dependency = dependencies[0];
+  private RoboDependency roboDependency = dependencies[0];
 
   @Before
   public void setUp() throws InitializationError, MalformedURLException {
@@ -96,9 +101,9 @@ public class CachedDependencyResolverTest {
   public void getLocalArtifactUrl_shouldWriteLocalArtifactUrlWhenCacheMiss() throws Exception{
     DependencyResolver res = createResolver();
 
-    when(internalResolver.getLocalArtifactUrl(dependency)).thenReturn(url);
+    when(internalResolver.getLocalArtifactUrl(roboDependency)).thenReturn(url);
 
-    URL url = res.getLocalArtifactUrl(dependency);
+    URL url = res.getLocalArtifactUrl(roboDependency);
 
     assertEquals(this.url, url);
     assertCacheContents(url);
@@ -109,9 +114,9 @@ public class CachedDependencyResolverTest {
     DependencyResolver res = createResolver();
     cache.write(CACHE_NAME, url);
 
-    URL url = res.getLocalArtifactUrl(dependency);
+    URL url = res.getLocalArtifactUrl(roboDependency);
 
-    verify(internalResolver, never()).getLocalArtifactUrl(dependency);
+    verify(internalResolver, never()).getLocalArtifactUrl(roboDependency);
 
     assertEquals(this.url, url);
   }
@@ -124,9 +129,9 @@ public class CachedDependencyResolverTest {
     DependencyResolver res = new CachedDependencyResolver(internalResolver, cache, cacheNamingStrategy, failStrategy);
     cache.write(CACHE_NAME, this.url);
 
-    res.getLocalArtifactUrl(dependency);
+    res.getLocalArtifactUrl(roboDependency);
 
-    verify(internalResolver).getLocalArtifactUrl(dependency);
+    verify(internalResolver).getLocalArtifactUrl(roboDependency);
   }
 
   private void assertCacheContents(URL[] urls) {
@@ -141,14 +146,14 @@ public class CachedDependencyResolverTest {
     return new CachedDependencyResolver(internalResolver, cache, cacheNamingStrategy, cacheValidationStrategy);
   }
 
-  private DependencyJar createDependency(final String groupId, final String artifactId) {
-    return new DependencyJar(groupId, artifactId, null, "") {
+  private RoboDependency createDependency(final String groupId, final String artifactId, final RoboDependency.Type type) {
+    return new RoboDependency(groupId, artifactId, null, "", type) {
 
       @Override
       public boolean equals(Object o) {
-        if(!(o instanceof DependencyJar)) return false;
+        if(!(o instanceof RoboDependency)) return false;
 
-        DependencyJar d = (DependencyJar) o;
+        RoboDependency d = (RoboDependency) o;
 
         return this.getArtifactId().equals(d.getArtifactId()) && this.getGroupId().equals(groupId);
       }

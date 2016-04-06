@@ -1,8 +1,6 @@
 package org.robolectric.internal.dependency;
 
 import java.io.File;
-import java.lang.String;
-import java.lang.StringBuilder;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -15,25 +13,30 @@ public class LocalDependencyResolver implements DependencyResolver {
   }
 
   @Override
-  public URL getLocalArtifactUrl(DependencyJar dependency) {
+  public URL getLocalArtifactUrl(RoboDependency roboDependency) {
     StringBuilder filenameBuilder = new StringBuilder();
-    filenameBuilder.append(dependency.getArtifactId())
+    filenameBuilder.append(roboDependency.getArtifactId())
         .append("-")
-        .append(dependency.getVersion());
+        .append(roboDependency.getVersion());
 
-    if (dependency.getClassifier() != null) {
+    if (roboDependency.getClassifier() != null) {
       filenameBuilder.append("-")
-          .append(dependency.getClassifier());
+          .append(roboDependency.getClassifier());
     }
 
-    filenameBuilder.append(".")
-        .append(dependency.getType());
+    if (roboDependency.getType().equals(RoboDependency.Type.dir.toString())) {
+      filenameBuilder.append("/");
+    }
+    else {
+      filenameBuilder.append(".")
+          .append(roboDependency.getType());
+    }
 
     return fileToUrl(validateFile(new File(offlineJarDir, filenameBuilder.toString())));
   }
 
   @Override
-  public URL[] getLocalArtifactUrls(DependencyJar... dependencies) {
+  public URL[] getLocalArtifactUrls(RoboDependency... dependencies) {
     URL[] urls = new URL[dependencies.length];
 
     for (int i=0; i<dependencies.length; i++) {
@@ -51,11 +54,11 @@ public class LocalDependencyResolver implements DependencyResolver {
    * @throws IllegalArgumentException if validation fails
    */
   private static File validateFile(File file) throws IllegalArgumentException {
-    if (!file.isFile()) {
-      throw new IllegalArgumentException("Path is not a file: " + file);
+    if (!file.isFile() && !file.isDirectory()) {
+      throw new IllegalArgumentException("Path is not a file or directory: " + file);
     }
     if (!file.canRead()) {
-      throw new IllegalArgumentException("Unable to read file: " + file);
+      throw new IllegalArgumentException("Unable to read: " + file);
     }
     return file;
   }

@@ -2,7 +2,6 @@ package org.robolectric.internal.dependency;
 
 import org.apache.maven.artifact.ant.DependenciesTask;
 import org.apache.maven.artifact.ant.RemoteRepository;
-import org.apache.maven.model.Dependency;
 import org.apache.tools.ant.Project;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,9 +45,9 @@ public class MavenDependencyResolverTest {
   @Test
   public void getLocalArtifactUrl_shouldAddConfiguredRemoteRepository() {
     DependencyResolver dependencyResolver = createResolver();
-    DependencyJar dependencyJar = new DependencyJar("group1", "artifact1", "", null);
+    RoboDependency roboDependency = new RoboDependency("group1", "artifact1", "", null, RoboDependency.Type.jar);
 
-    dependencyResolver.getLocalArtifactUrl(dependencyJar);
+    dependencyResolver.getLocalArtifactUrl(roboDependency);
 
     List<RemoteRepository> repositories = dependenciesTask.getRemoteRepositories();
 
@@ -61,14 +60,14 @@ public class MavenDependencyResolverTest {
   @Test
   public void getLocalArtifactUrl_shouldAddDependencyToDependenciesTask() {
     DependencyResolver dependencyResolver = createResolver();
-    DependencyJar dependencyJar = new DependencyJar("group1", "artifact1", "3", null);
+    RoboDependency roboDependencyJar = new RoboDependency("group1", "artifact1", "3", null, RoboDependency.Type.jar);
 
-    dependencyResolver.getLocalArtifactUrl(dependencyJar);
+    dependencyResolver.getLocalArtifactUrl(roboDependencyJar);
 
-    List<Dependency> dependencies = dependenciesTask.getDependencies();
+    List<org.apache.maven.model.Dependency> dependencies = dependenciesTask.getDependencies();
 
     assertEquals(1, dependencies.size());
-    Dependency dependency = dependencies.get(0);
+    org.apache.maven.model.Dependency dependency = dependencies.get(0);
     assertEquals("group1", dependency.getGroupId());
     assertEquals("artifact1", dependency.getArtifactId());
     assertEquals("3", dependency.getVersion());
@@ -79,9 +78,9 @@ public class MavenDependencyResolverTest {
   @Test
   public void getLocalArtifactUrl_shouldExecuteDependenciesTask() {
     DependencyResolver dependencyResolver = createResolver();
-    DependencyJar dependencyJar = new DependencyJar("group1", "artifact1", "", null);
+    RoboDependency roboDependency = new RoboDependency("group1", "artifact1", "", null, RoboDependency.Type.jar);
 
-    dependencyResolver.getLocalArtifactUrl(dependencyJar);
+    dependencyResolver.getLocalArtifactUrl(roboDependency);
 
     verify(dependenciesTask).execute();
   }
@@ -89,9 +88,9 @@ public class MavenDependencyResolverTest {
   @Test
   public void getLocalArtifactUrl_shouldReturnCorrectUrlForArtifactKey() {
     DependencyResolver dependencyResolver = createResolver();
-    DependencyJar dependencyJar = new DependencyJar("group1", "artifact1", "", null);
+    RoboDependency roboDependency = new RoboDependency("group1", "artifact1", "", null, RoboDependency.Type.jar);
 
-    URL url = dependencyResolver.getLocalArtifactUrl(dependencyJar);
+    URL url = dependencyResolver.getLocalArtifactUrl(roboDependency);
 
     assertEquals("file:/path1", url.toExternalForm());
   }
@@ -99,9 +98,9 @@ public class MavenDependencyResolverTest {
   @Test
   public void getLocalArtifactUrl_shouldReturnCorrectUrlForArtifactKeyWithClassifier() {
     DependencyResolver dependencyResolver = createResolver();
-    DependencyJar dependencyJar = new DependencyJar("group3", "artifact3", "", "classifier3");
+    RoboDependency roboDependency = new RoboDependency("group3", "artifact3", "", "classifier3", RoboDependency.Type.jar);
 
-    URL url = dependencyResolver.getLocalArtifactUrl(dependencyJar);
+    URL url = dependencyResolver.getLocalArtifactUrl(roboDependency);
 
     assertEquals("file:/path3", url.toExternalForm());
   }
@@ -118,10 +117,10 @@ public class MavenDependencyResolverTest {
   @Test
   public void getLocalArtifactUrls_shouldReturnURLsForEachDependencyJar() {
     DependencyResolver dependencyResolver = createResolver();
-    DependencyJar dependencyJar1 = new DependencyJar("group1", "artifact1", "", null);
-    DependencyJar dependencyJar2 = new DependencyJar("group2", "artifact2", "", null);
+    RoboDependency roboDependency1 = new RoboDependency("group1", "artifact1", "", null, RoboDependency.Type.jar);
+    RoboDependency roboDependency2 = new RoboDependency("group2", "artifact2", "", null, RoboDependency.Type.jar);
 
-    URL[] urls = dependencyResolver.getLocalArtifactUrls(dependencyJar1, dependencyJar2);
+    URL[] urls = dependencyResolver.getLocalArtifactUrls(roboDependency1, roboDependency2);
 
     assertEquals(2, urls.length);
     assertEquals("file:/path1", urls[0].toExternalForm());
@@ -131,12 +130,12 @@ public class MavenDependencyResolverTest {
   @Test
   public void getLocalArtifactUrls_shouldAddEachDependencyToDependenciesTask() {
     DependencyResolver dependencyResolver = createResolver();
-    DependencyJar dependencyJar1 = new DependencyJar("group1", "artifact1", "", null);
-    DependencyJar dependencyJar2 = new DependencyJar("group2", "artifact2", "", null);
+    RoboDependency roboDependency1 = new RoboDependency("group1", "artifact1", "", null, RoboDependency.Type.jar);
+    RoboDependency roboDependency2 = new RoboDependency("group2", "artifact2", "", null, RoboDependency.Type.jar);
 
-    dependencyResolver.getLocalArtifactUrls(dependencyJar1, dependencyJar2);
+    dependencyResolver.getLocalArtifactUrls(roboDependency1, roboDependency2);
 
-    verify(dependenciesTask, times(2)).addDependency(any(Dependency.class));
+    verify(dependenciesTask, times(2)).addDependency(any(org.apache.maven.model.Dependency.class));
   }
 
   private DependencyResolver createResolver() {
