@@ -48,7 +48,7 @@ public class CachedDependencyResolverTest {
   private URL url;
   private URL[] urls;
   private Cache cache = new CacheStub();
-  private RoboDependency[] dependencies = new RoboDependency[]{
+  private RoboDependency[] dependencies = {
       createDependency("group1", "artifact1", RoboDependency.Type.jar),
       createDependency("group2", "artifact2", RoboDependency.Type.zip),
   };
