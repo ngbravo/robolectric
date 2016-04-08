@@ -232,10 +232,10 @@ build_layout_lib() {
       "android/view/View_Delegate.class"
     );
 
-    for class_to_ignore in "${classes_to_ignore[@]}"
-    do
-      zip -d ${src}/layoutlib.jar ${class_to_ignore}
-    done
+    # for class_to_ignore in "${classes_to_ignore[@]}"
+    # do
+    #   zip -d ${src}/layoutlib.jar ${class_to_ignore} || true
+    # done
 
     jar xf ${src}/layoutlib.jar
 }
