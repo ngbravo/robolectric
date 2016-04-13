@@ -24,7 +24,7 @@ public class SdkConfig {
     //addSdk(Build.VERSION_CODES.JELLY_BEAN_MR1, "4.2.2_r1.2", "0");
     //addSdk(Build.VERSION_CODES.JELLY_BEAN_MR2, "4.3_r2", "0");
     //addSdk(Build.VERSION_CODES.KITKAT, "4.4_r1", "1");
-    //addSdk(Build.VERSION_CODES.LOLLIPOP, "5.0.0_r2", "1");
+    addSdk(Build.VERSION_CODES.LOLLIPOP, "5.0.0_r2", "1");
     addSdk(Build.VERSION_CODES.LOLLIPOP_MR1, "5.1.1_r9", "1");
     addSdk(Build.VERSION_CODES.M, "6.0.0_r1", "0");
     ROBOLECTRIC_VERSION = getRobolectricVersion();
