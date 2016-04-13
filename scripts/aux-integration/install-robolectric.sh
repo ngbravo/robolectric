@@ -141,7 +141,7 @@ replace_class_from_android-all () {
   # We replace the original class and all its subclasses
   jar -uvf android-all-$1.jar "${2}.class" || true
 
-  for subclass in ${AUX_DIR}/temp/patching-workspace/${1}/${2}\$*.class
+  for subclass in ./${2}\$*.class
   do
     jar -uvf android-all-$1.jar "${subclass}" || true
   done
