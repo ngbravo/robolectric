@@ -49,9 +49,13 @@ public class RoboLayoutlibAdapter {
     FontFamily_Delegate.setFontLocation(fontLocation);
   }
 
-#else
+#elseif ($api == 21)
   private static void setFontLocationLocal(String fontLocation) {
     Typeface_Delegate.setFontLocation(fontLocation);
+  }
+#else
+  private static void setFontLocationLocal(String fontLocation) {
+    // TODO: complete
   }
 #end
 

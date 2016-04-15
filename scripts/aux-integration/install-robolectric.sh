@@ -17,6 +17,9 @@ done
 
 PARALLEL_BUILD_CONFIG="0.5C"
 TEST_VERSIONS=(
+  "4.1.2_r1-robolectric-0"
+  "4.2.2_r1.2-robolectric-0"
+  #"4.3_r2-robolectric-0"
   #"4.4_r1-robolectric-1"
   "5.0.0_r2-robolectric-1"
   "5.1.1_r9-robolectric-1"
@@ -24,7 +27,7 @@ TEST_VERSIONS=(
 )
 
 #API_VERSIONS=(16, 17, 18, 19, 21, 22, 23)
-API_VERSIONS=(21, 22, 23)
+API_VERSIONS=(16, 17, 21, 22, 23)
 
 PROJECT=$(cd $(dirname "$0")/../..; pwd)
 M2_REPO=$(cd ~/.m2/repository/org/robolectric; pwd)
