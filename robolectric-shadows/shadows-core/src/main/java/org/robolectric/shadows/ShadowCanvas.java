@@ -8,6 +8,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
+
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 import org.robolectric.util.ReflectionHelpers;
@@ -111,7 +112,7 @@ public class ShadowCanvas {
     int y = (int) (top + translateY);
     if (x != 0 || y != 0) {
       appendDescription(" at (" + x + "," + y + ")");
-  }
+    }
 
     if (scaleX != 1 && scaleY != 1) {
       appendDescription(" scaled by (" + scaleX + "," + scaleY + ")");
