@@ -101,11 +101,15 @@ $ tapas core-libart services services.accessibility telephony-common framework e
 $ ANDROID_COMPILE_WITH_JACK=false make -j8
 ```
 
-Finally, to include layoutlib (after completing above steps):
+## 7. Include Layoutlib
+
+To include layoutlib run:
 ```
 $ tapas layoutlib
 $ make -j8
 ```
+
+## 8. Run build-android.sh
 
 (Optional) Signing Artifacts:
 The end of the script will prompt you to sign the new artifacts.  You will be prompted a total of 4 times (once for each artifact).  To make this easier, run this command beforehand:
