@@ -123,6 +123,17 @@ public class RobolectricTestRunner extends BlockJUnit4ClassRunner {
   protected DependencyResolver getDependencyResolver() {
     if (dependencyResolver == null) {
 
+      // TODO remove HACK
+      System.setProperty("robolectric.offline", "true");
+      System.setProperty("robolectric.dependency.dir", "<SOME_DIRECTORY>");
+      // End HACK
+
+      Properties properties = System.getProperties();
+      Set<Object>  sysPropertiesKeys = properties.keySet();
+      for (Object key : sysPropertiesKeys) {
+        System.out.println(key + " =" + properties.getProperty((String)key));
+      }
+
       if (Boolean.getBoolean("robolectric.offline")) {
         String dependencyDir = System.getProperty("robolectric.dependency.dir", ".");
 

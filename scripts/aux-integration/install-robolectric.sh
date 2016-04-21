@@ -137,6 +137,9 @@ replace_and_remove_classes () {
 
   replace_class_from_android-all $1 "android/view/View"
   remove_class_from_android-all $1 "android/view/View_Delegate"
+
+  replace_class_from_android-all $1 "android/os/Build"
+  remove_class_from_android-all $1 "android/os/Build_Delegate"
 }
 
 replace_class_from_android-all () {
