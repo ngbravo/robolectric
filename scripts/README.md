@@ -50,7 +50,7 @@ To check out a branch other than `master`, specify it with `-b`. For a list of b
 *  `5.1.1_r9`    - Lollipop MR1
 *  `6.0.0_r1`    - Marshmallow
 ```
-$ repo init -u https://android.googlesource.com/platform/manifest -b android-6.0.0_r1
+$ repo init -u https://android.googlesource.com/platform/manifest -b android-<ANDROID_VERSION>
 ```
 
 A successful initialization will end with a message stating that Repo is initialized in your working directory. Your client directory should now contain a `.repo` directory where files such as the manifest will be kept.
@@ -85,6 +85,7 @@ $ source build/envsetup.sh
 For Jellybean 4.2 and below:
 ```
 $ lunch generic_x86-eng
+$ tapas layoutlib
 $ make -j8
 ```
 
@@ -92,21 +93,15 @@ For Jellybean 4.3 to Lollipop:
 ```
 $ lunch aosp_x86-eng
 $ make -j8
+$ tapas layoutlib
+$ make -j8
 ```
 
 For Marshmallow and above:
 
 ```
-$ tapas core-libart services services.accessibility telephony-common framework ext icu4j-icudata-jarjar
+$ tapas core-libart services services.accessibility telephony-common framework ext icu4j-icudata-jarjar layoutlib
 $ ANDROID_COMPILE_WITH_JACK=false make -j8
-```
-
-## 7. Include Layoutlib
-
-To include layoutlib run:
-```
-$ tapas layoutlib
-$ make -j8
 ```
 
 ## 8. Run build-android.sh
@@ -119,7 +114,7 @@ $ gpg-agent --daemon
 
 Finally, in your Robolectric directory run:
 ```
-$ build-android.sh <android version> <robolectric sub-version>
+$ build-android.sh <ANDROID_VERSION> <ROBOLECTRIC_SUB_VERSION>
 ```
 
 For Robolectric version `6.0.0_r1-robolectric-0`, android version would be `6.0.0_r1` and  robolectric sub-version `0`.
