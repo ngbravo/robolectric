@@ -4,6 +4,7 @@ import static android.os.Build.VERSION_CODES.JELLY_BEAN;
 import static org.robolectric.shadow.api.Shadow.directlyOn;
 
 import android.content.res.Configuration;
+import android.os.Build.VERSION_CODES;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.View;
@@ -12,6 +13,7 @@ import android.view.WindowManagerImpl;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
+import java.util.HashMap;
 import java.util.List;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Implementation;
@@ -42,11 +44,11 @@ public class ShadowWindowManagerImpl extends ShadowWindowManager {
 
   @RealObject
   WindowManagerImpl realObject;
-  private static Multimap<Display, View> views = ArrayListMultimap.create();
+  private static final Multimap<Integer, View> views = ArrayListMultimap.create();
 
   @Implementation
   public void addView(View view, android.view.ViewGroup.LayoutParams layoutParams) {
-    views.put(realObject.getDefaultDisplay(), view);
+    views.put(realObject.getDefaultDisplay().getDisplayId(), view);
     // views.add(view);
     directlyOn(
         realObject,
@@ -58,13 +60,13 @@ public class ShadowWindowManagerImpl extends ShadowWindowManager {
 
   @Implementation
   public void removeView(View view) {
-    views.remove(realObject.getDefaultDisplay(), view);
+    views.remove(realObject.getDefaultDisplay().getDisplayId(), view);
     directlyOn(realObject, WindowManagerImpl.class, "removeView",
         ClassParameter.from(View.class, view));
   }
 
   public List<View> getViews() {
-    return ImmutableList.copyOf(views.get(realObject.getDefaultDisplay()));
+    return ImmutableList.copyOf(views.get(realObject.getDefaultDisplay().getDisplayId()));
   }
 
   @Implementation(maxSdk = JELLY_BEAN)
@@ -79,7 +81,7 @@ public class ShadowWindowManagerImpl extends ShadowWindowManager {
   @Implements(className = "android.view.WindowManagerImpl$CompatModeWrapper", maxSdk = JELLY_BEAN)
   public static class ShadowCompatModeWrapper {
     @Implementation(maxSdk = JELLY_BEAN)
-    public Display getDefaultDisplay() {
+    protected Display getDefaultDisplay() {
       return defaultDisplayJB;
     }
 
@@ -89,5 +91,14 @@ public class ShadowWindowManagerImpl extends ShadowWindowManager {
   public static void reset() {
     defaultDisplayJB = null;
     views.clear();
+    if (RuntimeEnvironment.getApiLevel() <= VERSION_CODES.JELLY_BEAN) {
+      ReflectionHelpers.setStaticField(
+          WindowManagerImpl.class,
+          "sWindowManager",
+          ReflectionHelpers.newInstance(WindowManagerImpl.class));
+      HashMap windowManagers =
+          ReflectionHelpers.getStaticField(WindowManagerImpl.class, "sCompatWindowManagers");
+      windowManagers.clear();
+    }
   }
 }

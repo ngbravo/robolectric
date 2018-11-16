@@ -6,8 +6,6 @@ import android.os.Looper;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation.AnimationListener;
-import android.view.animation.LayoutAnimationController;
 import java.io.PrintStream;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
@@ -20,13 +18,11 @@ import org.robolectric.util.ReflectionHelpers.ClassParameter;
 public class ShadowViewGroup extends ShadowView {
   @RealObject protected ViewGroup realViewGroup;
 
-  private AnimationListener animListener;
-  private LayoutAnimationController layoutAnim;
   private boolean disallowInterceptTouchEvent = false;
   private MotionEvent interceptedTouchEvent;
 
   @Implementation
-  public void addView(final View child, final int index, final ViewGroup.LayoutParams params) {
+  protected void addView(final View child, final int index, final ViewGroup.LayoutParams params) {
     ShadowLooper shadowLooper = Shadow.extract(Looper.getMainLooper());
     shadowLooper.runPaused(() ->
         directlyOn(realViewGroup, ViewGroup.class, "addView",
@@ -80,27 +76,7 @@ public class ShadowViewGroup extends ShadowView {
   }
 
   @Implementation
-  public void setLayoutAnimationListener(AnimationListener listener) {
-    animListener = listener;
-  }
-
-  @Implementation
-  public AnimationListener getLayoutAnimationListener() {
-    return animListener;
-  }
-
-  @Implementation
-  public void setLayoutAnimation(LayoutAnimationController layoutAnim) {
-    this.layoutAnim = layoutAnim;
-  }
-
-  @Implementation
-  public LayoutAnimationController getLayoutAnimation() {
-    return layoutAnim;
-  }
-
-  @Implementation
-  public void requestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+  protected void requestDisallowInterceptTouchEvent(boolean disallowIntercept) {
     disallowInterceptTouchEvent = disallowIntercept;
   }
 
@@ -120,7 +96,7 @@ public class ShadowViewGroup extends ShadowView {
   }
 
   @Implementation
-  public boolean onInterceptTouchEvent(MotionEvent ev) {
+  protected boolean onInterceptTouchEvent(MotionEvent ev) {
     interceptedTouchEvent = ev;
     return false;
   }

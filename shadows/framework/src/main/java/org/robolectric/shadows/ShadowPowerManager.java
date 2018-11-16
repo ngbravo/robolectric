@@ -1,13 +1,15 @@
 package org.robolectric.shadows;
 
-import static android.os.Build.VERSION_CODES.KITKAT_WATCH;
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
 import static android.os.Build.VERSION_CODES.M;
 import static org.robolectric.shadows.ShadowApplication.getInstance;
 
 import android.os.PowerManager;
 import android.os.WorkSource;
+import com.google.common.collect.ImmutableList;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Implementation;
@@ -21,17 +23,18 @@ public class ShadowPowerManager {
   private boolean isInteractive = true;
   private boolean isPowerSaveMode = false;
   private boolean isDeviceIdleMode = false;
+  private List<String> rebootReasons = new ArrayList<String>();
   private Map<String, Boolean> ignoringBatteryOptimizations = new HashMap<>();
 
   @Implementation
-  public PowerManager.WakeLock newWakeLock(int flags, String tag) {
+  protected PowerManager.WakeLock newWakeLock(int flags, String tag) {
     PowerManager.WakeLock wl = Shadow.newInstanceOf(PowerManager.WakeLock.class);
     getInstance().addWakeLock(wl);
     return wl;
   }
 
   @Implementation
-  public boolean isScreenOn() {
+  protected boolean isScreenOn() {
     return isScreenOn;
   }
 
@@ -39,8 +42,8 @@ public class ShadowPowerManager {
     isScreenOn = screenOn;
   }
 
-  @Implementation(minSdk = KITKAT_WATCH)
-  public boolean isInteractive() {
+  @Implementation(minSdk = LOLLIPOP)
+  protected boolean isInteractive() {
     return isInteractive;
   }
 
@@ -48,8 +51,8 @@ public class ShadowPowerManager {
     isInteractive = interactive;
   }
 
-  @Implementation(minSdk = KITKAT_WATCH)
-  public boolean isPowerSaveMode() {
+  @Implementation(minSdk = LOLLIPOP)
+  protected boolean isPowerSaveMode() {
     return isPowerSaveMode;
   }
 
@@ -60,7 +63,7 @@ public class ShadowPowerManager {
   private Map<Integer, Boolean> supportedWakeLockLevels = new HashMap<>();
 
   @Implementation(minSdk = LOLLIPOP)
-  public boolean isWakeLockLevelSupported(int level) {
+  protected boolean isWakeLockLevelSupported(int level) {
     return supportedWakeLockLevels.containsKey(level) ? supportedWakeLockLevels.get(level) : false;
   }
 
@@ -81,9 +84,7 @@ public class ShadowPowerManager {
     this.isDeviceIdleMode = isDeviceIdleMode;
   }
 
-  /**
-   * Discards the most recent {@code PowerManager.WakeLock}s
-   */
+  /** Discards the most recent {@code PowerManager.WakeLock}s */
   @Resetter
   public static void reset() {
     ShadowApplication shadowApplication = ShadowApplication.getInstance();
@@ -103,13 +104,28 @@ public class ShadowPowerManager {
   }
 
   @Implementation(minSdk = M)
-  public boolean isIgnoringBatteryOptimizations(String packageName) {
+  protected boolean isIgnoringBatteryOptimizations(String packageName) {
     Boolean result = ignoringBatteryOptimizations.get(packageName);
     return result == null ? false : result;
   }
 
   public void setIgnoringBatteryOptimizations(String packageName, boolean value) {
     ignoringBatteryOptimizations.put(packageName, Boolean.valueOf(value));
+  }
+
+  @Implementation
+  protected void reboot(String reason) {
+    rebootReasons.add(reason);
+  }
+
+  /** Returns the number of times {@link #reboot(String)} was called. */
+  public int getTimesRebooted() {
+    return rebootReasons.size();
+  }
+
+  /** Returns the list of reasons for each reboot, in chronological order. */
+  public ImmutableList<String> getRebootReasons() {
+    return ImmutableList.copyOf(rebootReasons);
   }
 
   @Implements(PowerManager.WakeLock.class)
@@ -120,13 +136,12 @@ public class ShadowPowerManager {
     private WorkSource workSource = null;
 
     @Implementation
-    public void acquire() {
+    protected void acquire() {
       acquire(0);
-
     }
 
     @Implementation
-    public synchronized void acquire(long timeout) {
+    protected synchronized void acquire(long timeout) {
       if (refCounted) {
         refCount++;
       } else {
@@ -135,7 +150,7 @@ public class ShadowPowerManager {
     }
 
     @Implementation
-    public synchronized void release() {
+    protected synchronized void release() {
       if (refCounted) {
         if (--refCount < 0) throw new RuntimeException("WakeLock under-locked");
       } else {
@@ -144,7 +159,7 @@ public class ShadowPowerManager {
     }
 
     @Implementation
-    public synchronized boolean isHeld() {
+    protected synchronized boolean isHeld() {
       return refCounted ? refCount > 0 : locked;
     }
 
@@ -158,12 +173,12 @@ public class ShadowPowerManager {
     }
 
     @Implementation
-    public void setReferenceCounted(boolean value) {
+    protected void setReferenceCounted(boolean value) {
       refCounted = value;
     }
 
     @Implementation
-    public synchronized void setWorkSource(WorkSource ws) {
+    protected synchronized void setWorkSource(WorkSource ws) {
       workSource = ws;
     }
 

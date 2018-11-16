@@ -1,11 +1,13 @@
 package org.robolectric.shadows;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static com.google.common.truth.Truth.assertThat;
 import static org.robolectric.res.android.ResourceTypes.ANDROID_NS;
 import static org.robolectric.res.android.ResourceTypes.AUTO_NS;
 
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
+import androidx.test.core.app.ApplicationProvider;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,12 +15,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.R;
 import org.robolectric.Robolectric;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-@RunWith(RobolectricTestRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class XmlPullParserTest {
 
   // emulator output:
@@ -34,7 +35,7 @@ http://schemas.android.com/apk/res-auto:title(resId=2130771971) type=CDATA: valu
 
   @Test
   public void xmlParser() throws IOException, XmlPullParserException {
-    Resources resources = RuntimeEnvironment.application.getResources();
+    Resources resources = ApplicationProvider.getApplicationContext().getResources();
     XmlResourceParser parser = resources.getXml(R.xml.xml_attrs);
     assertThat(parser).isNotNull();
 
@@ -54,7 +55,7 @@ http://schemas.android.com/apk/res-auto:title(resId=2130771971) type=CDATA: valu
       }
     }
 
-    assertThat(attrNames).containsExactlyInAnyOrder(
+    assertThat(attrNames).containsExactly(
         ANDROID_NS + ":id",
         ANDROID_NS + ":height",
         ANDROID_NS + ":width",

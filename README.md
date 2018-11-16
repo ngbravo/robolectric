@@ -11,7 +11,6 @@ Here's an example of a simple test written using Robolectric:
 
 ```java
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class)
 public class MyActivityTest {
 
   @Test
@@ -38,7 +37,7 @@ If you'd like to start a new project with Robolectric tests you can refer to `de
 #### build.gradle:
 
 ```groovy
-testCompile "org.robolectric:robolectric:3.8"
+testImplementation "org.robolectric:robolectric:4.0.2"
 ```
 
 ## Building And Contributing
@@ -67,6 +66,6 @@ repositories {
 }
 
 dependencies {
-    testCompile "org.robolectric:robolectric:3.9-SNAPSHOT"
+    testImplementation "org.robolectric:robolectric:4.1-SNAPSHOT"
 }
 ```

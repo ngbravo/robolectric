@@ -1,6 +1,7 @@
 package org.robolectric.android.internal;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static android.os.Build.VERSION_CODES.O;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
 import static org.mockito.Mockito.mock;
@@ -10,6 +11,7 @@ import android.app.Application;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Build;
+import androidx.test.core.app.ApplicationProvider;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.util.Locale;
@@ -24,13 +26,13 @@ import org.robolectric.BootstrapDeferringRobolectricTestRunner.BootstrapWrapper;
 import org.robolectric.BootstrapDeferringRobolectricTestRunner.RoboInject;
 import org.robolectric.RoboSettings;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.Shadows;
 import org.robolectric.android.DeviceConfig;
 import org.robolectric.android.DeviceConfig.ScreenSize;
 import org.robolectric.annotation.Config;
 import org.robolectric.manifest.AndroidManifest;
 import org.robolectric.manifest.RoboNotFoundException;
 import org.robolectric.res.ResourceTable;
+import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowApplication;
 import org.robolectric.shadows.ShadowLooper;
 
@@ -50,8 +52,8 @@ public class ParallelUniverseTest {
     bootstrapWrapper.callSetUpApplicationState();
 
     assertThat(RuntimeEnvironment.getMasterScheduler())
-        .isNotNull()
-        .isSameAs(ShadowLooper.getShadowMainLooper().getScheduler())
+        .isSameAs(ShadowLooper.getShadowMainLooper().getScheduler());
+    assertThat(RuntimeEnvironment.getMasterScheduler())
         .isSameAs(ShadowApplication.getInstance().getForegroundThreadScheduler());
   }
 
@@ -60,9 +62,11 @@ public class ParallelUniverseTest {
     RoboSettings.setUseGlobalScheduler(true);
     try {
       bootstrapWrapper.callSetUpApplicationState();
-      final ShadowApplication shadowApplication = Shadows.shadowOf(RuntimeEnvironment.application);
+      final ShadowApplication shadowApplication =
+          Shadow.extract(ApplicationProvider.getApplicationContext());
       assertThat(shadowApplication.getBackgroundThreadScheduler())
-          .isSameAs(shadowApplication.getForegroundThreadScheduler())
+          .isSameAs(shadowApplication.getForegroundThreadScheduler());
+      assertThat(RuntimeEnvironment.getMasterScheduler())
           .isSameAs(RuntimeEnvironment.getMasterScheduler());
     } finally {
       RoboSettings.setUseGlobalScheduler(false);
@@ -72,7 +76,8 @@ public class ParallelUniverseTest {
   @Test
   public void setUpApplicationState_setsBackgroundScheduler_toBeDifferentToForeground_byDefault() {
     bootstrapWrapper.callSetUpApplicationState();
-    final ShadowApplication shadowApplication = Shadows.shadowOf(RuntimeEnvironment.application);
+    final ShadowApplication shadowApplication =
+        Shadow.extract(ApplicationProvider.getApplicationContext());
     assertThat(shadowApplication.getBackgroundThreadScheduler())
         .isNotSameAs(shadowApplication.getForegroundThreadScheduler());
   }
@@ -118,8 +123,14 @@ public class ParallelUniverseTest {
     String givenQualifiers = "large-land";
     bootstrapWrapper.config = new Config.Builder().setQualifiers(givenQualifiers).build();
     bootstrapWrapper.callSetUpApplicationState();
+
+    String optsForO = RuntimeEnvironment.getApiLevel() >= O
+        ? "nowidecg-lowdr-"
+        : "";
     assertThat(RuntimeEnvironment.getQualifiers())
-        .contains("large-notlong-notround-land-notnight-mdpi-finger-keyssoft-nokeys-navhidden-nonav-v" + Build.VERSION.RESOURCES_SDK_INT);
+        .contains("large-notlong-notround-" + optsForO + "land-notnight-mdpi-finger-keyssoft"
+            + "-nokeys-navhidden-nonav-v"
+            + Build.VERSION.RESOURCES_SDK_INT);
   }
 
   @Test
@@ -173,7 +184,8 @@ public class ParallelUniverseTest {
   public void whenNotPrefixedWithPlus_setQualifiers_shouldNotBeBasedOnPreviousConfig() throws Exception {
     bootstrapWrapper.callSetUpApplicationState();
     RuntimeEnvironment.setQualifiers("land");
-    assertThat(RuntimeEnvironment.getQualifiers()).contains("w470dp-h320dp").contains("-land-");
+    assertThat(RuntimeEnvironment.getQualifiers()).contains("w470dp-h320dp");
+    assertThat(RuntimeEnvironment.getQualifiers()).contains("-land-");
   }
 
   @Test @Config(qualifiers = "w100dp-h125dp")

@@ -1,16 +1,15 @@
 package org.robolectric;
 
 import static android.os.Build.VERSION_CODES.JELLY_BEAN;
+import static com.google.common.truth.Truth.assertThat;
 import static java.util.Collections.singletonList;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.junit.Assert.fail;
 import static org.robolectric.util.TestUtil.resourceFile;
 
 import android.app.Application;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 import javax.annotation.Nonnull;
 import org.junit.After;
 import org.junit.Before;
@@ -135,7 +134,7 @@ public class TestRunnerSequenceTest {
   private void assertNoFailures(Result result) {
     if (!result.wasSuccessful()) {
       for (Failure failure : result.getFailures()) {
-        fail(failure.getMessage(), failure.getException());
+        fail(failure.getMessage());
       }
     }
   }
@@ -148,7 +147,7 @@ public class TestRunnerSequenceTest {
     @Nonnull
     @Override
     protected SdkPicker createSdkPicker() {
-      return new SdkPicker(singletonList(new SdkConfig(JELLY_BEAN)), new Properties());
+      return new SdkPicker(singletonList(new SdkConfig(JELLY_BEAN)), null);
     }
 
     @Nonnull
@@ -159,7 +158,6 @@ public class TestRunnerSequenceTest {
       return builder.build();
     }
 
-    @Override
     protected AndroidManifest getAppManifest(Config config) {
       return new AndroidManifest(resourceFile("TestAndroidManifest.xml"), resourceFile("res"), resourceFile("assets"));
     }

@@ -1,28 +1,27 @@
 package org.robolectric.shadows;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertNotNull;
 
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.ColorDrawable;
-import java.util.Objects;
+import androidx.test.core.app.ApplicationProvider;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.R;
 import org.robolectric.Robolectric;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.res.AttributeResource;
 
-@RunWith(RobolectricTestRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class ShadowTypedArrayTest {
   private Context context;
 
   @Before
   public void setUp() throws Exception {
-    context = RuntimeEnvironment.application;
+    context = ApplicationProvider.getApplicationContext();
   }
 
   @Test
@@ -104,7 +103,8 @@ public class ShadowTypedArrayTest {
             .addAttribute(android.R.attr.background, "#ff777777")
             .build(),
         new int[]{android.R.attr.background});
-    assertThat(typedArray.getDrawable(0)).isEqualTo(new ColorDrawable(0xff777777));
+    ColorDrawable drawable = (ColorDrawable) typedArray.getDrawable(0);
+    assertThat(drawable.getColor()).isEqualTo(0xff777777);
   }
 
   @Test
@@ -116,7 +116,9 @@ public class ShadowTypedArrayTest {
         new int[]{android.R.attr.absListViewStyle});
     CharSequence[] textArray = typedArray.getTextArray(0);
     assertThat(textArray).isInstanceOf(CharSequence[].class);
-    assertThat(textArray).allMatch(Objects::isNull);
+    for (CharSequence text : textArray) {
+      assertThat(text).isNull();
+    }
   }
 
   @Test
@@ -126,7 +128,7 @@ public class ShadowTypedArrayTest {
             .addAttribute(R.attr.responses, "@array/greetings")
             .build(),
         new int[]{R.attr.responses});
-    assertThat(typedArray.getTextArray(0)).containsExactly("hola", "Hello");
+    assertThat(typedArray.getTextArray(0)).asList().containsExactly("hola", "Hello");
   }
 
   @Test public void hasValue_withValue() throws Exception {

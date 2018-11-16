@@ -1,8 +1,7 @@
 package org.robolectric.shadows;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assume.assumeTrue;
-import static org.robolectric.Shadows.shadowOf;
 import static org.robolectric.shadows.ShadowAssetManager.useLegacy;
 
 import android.content.res.Resources;
@@ -11,36 +10,28 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.util.Xml;
+import androidx.test.core.app.ApplicationProvider;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import com.google.common.collect.Range;
 import java.io.InputStream;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.R;
 import org.robolectric.Robolectric;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.android.XmlResourceParserImpl;
 import org.robolectric.annotation.Config;
 import org.xmlpull.v1.XmlPullParser;
 
-@RunWith(RobolectricTestRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class ShadowResourcesTest {
   private Resources resources;
 
   @Before
   public void setup() throws Exception {
-    resources = RuntimeEnvironment.application.getResources();
-  }
-
-  @Test
-  public void getQuantityString() throws Exception {
-    assertThat(resources.getQuantityString(R.plurals.beer, 0)).isEqualTo("beers");
-    assertThat(resources.getQuantityString(R.plurals.beer, 1)).isEqualTo("beer");
-    assertThat(resources.getQuantityString(R.plurals.beer, 2)).isEqualTo("beers");
-    assertThat(resources.getQuantityString(R.plurals.beer, 3)).isEqualTo("beers");
+    resources = ApplicationProvider.getApplicationContext().getResources();
   }
 
   @Test
@@ -68,14 +59,6 @@ public class ShadowResourcesTest {
     assertThat(resources.getColorStateList(identifier_missing_from_r_file)).isNotNull();
   }
 
-  @Test
-  public void testDensity() {
-    assertThat(RuntimeEnvironment.application.getResources().getDisplayMetrics().density).isEqualTo(1f);
-
-    shadowOf(RuntimeEnvironment.application.getResources()).setDensity(1.5f);
-    assertThat(RuntimeEnvironment.application.getResources().getDisplayMetrics().density).isEqualTo(1.5f);
-  }
-
   @Test @Config(qualifiers = "fr")
   public void openRawResource_shouldLoadDrawableWithQualifiers() throws Exception {
     InputStream resourceStream = resources.openRawResource(R.drawable.an_image);
@@ -91,16 +74,6 @@ public class ShadowResourcesTest {
     } else {
       assertThat(resources.openRawResourceFd(R.raw.raw_resource)).isNotNull();
     }
-
-  }
-
-  @Test
-  public void setScaledDensityShouldSetScaledDensityInDisplayMetrics() {
-    final DisplayMetrics displayMetrics = resources.getDisplayMetrics();
-
-    assertThat(displayMetrics.scaledDensity).isEqualTo(1f);
-    shadowOf(resources).setScaledDensity(2.5f);
-    assertThat(displayMetrics.scaledDensity).isEqualTo(2.5f);
   }
 
   @Test
@@ -113,7 +86,7 @@ public class ShadowResourcesTest {
 
     theme.resolveAttribute(android.R.attr.windowBackground, out, true);
     assertThat(out.type).isNotEqualTo(TypedValue.TYPE_REFERENCE);
-    assertThat(out.type).isBetween(TypedValue.TYPE_FIRST_COLOR_INT, TypedValue.TYPE_LAST_COLOR_INT);
+    assertThat(out.type).isIn(Range.closed(TypedValue.TYPE_FIRST_COLOR_INT, TypedValue.TYPE_LAST_COLOR_INT));
 
     int value = resources.getColor(android.R.color.black);
     assertThat(out.data).isEqualTo(value);
@@ -199,10 +172,14 @@ public class ShadowResourcesTest {
         .addAttribute(android.R.attr.viewportHeight, "24.0")
         .build();
 
-    TypedArray typedArray = RuntimeEnvironment.application.getTheme().obtainStyledAttributes(attributes, new int[] {
-        android.R.attr.viewportWidth,
-        android.R.attr.viewportHeight
-    }, 0, 0);
+    TypedArray typedArray =
+        ApplicationProvider.getApplicationContext()
+            .getTheme()
+            .obtainStyledAttributes(
+                attributes,
+                new int[] {android.R.attr.viewportWidth, android.R.attr.viewportHeight},
+                0,
+                0);
     assertThat(typedArray.getFloat(0, 0)).isEqualTo(12.0f);
     assertThat(typedArray.getFloat(1, 0)).isEqualTo(24.0f);
     typedArray.recycle();
@@ -224,10 +201,14 @@ public class ShadowResourcesTest {
         .addAttribute(android.R.attr.viewportHeight, "@dimen/dimen30px")
         .build();
 
-    TypedArray typedArray = RuntimeEnvironment.application.getTheme().obtainStyledAttributes(attributes, new int[] {
-        android.R.attr.viewportWidth,
-        android.R.attr.viewportHeight
-    }, 0, 0);
+    TypedArray typedArray =
+        ApplicationProvider.getApplicationContext()
+            .getTheme()
+            .obtainStyledAttributes(
+                attributes,
+                new int[] {android.R.attr.viewportWidth, android.R.attr.viewportHeight},
+                0,
+                0);
     assertThat(typedArray.getDimension(0, 0)).isEqualTo(20f);
     assertThat(typedArray.getDimension(1, 0)).isEqualTo(30f);
     typedArray.recycle();

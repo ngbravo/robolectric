@@ -34,8 +34,8 @@ import org.robolectric.res.android.Ref;
  * Java representation of framework native input Transliterated from oreo-mr1 (SDK 27)
  * frameworks/native/include/input/Input.h and libs/input/Input.cpp
  *
- * @see https://android.googlesource.com/platform/frameworks/native/+/oreo-mr1-release/include/input/Input.h
- * @see https://android.googlesource.com/platform/frameworks/native/+/oreo-mr1-release/libs/input/Input.cpp
+ * @see <a href="https://android.googlesource.com/platform/frameworks/native/+/oreo-mr1-release/include/input/Input.h">include/input/Input.h</a>
+ * @see <a href="https://android.googlesource.com/platform/frameworks/native/+/oreo-mr1-release/libs/input/Input.cpp>libs/input/Input.cpp</a>
  */
 public class NativeInput {
 
@@ -237,7 +237,7 @@ public class NativeInput {
     //       virtual int getType()  { return AINPUT_EVENT_TYPE_KEY; }
     //        int getAction()  { return mAction; }
     //        int getFlags()  { return mFlags; }
-    //        void withFlags(int flags) { mFlags = flags; }
+    //        void setFlags(int flags) { mFlags = flags; }
     //        int getKeyCode()  { return mKeyCode; }
     //        int getScanCode()  { return mScanCode; }
     //        int getMetaState()  { return mMetaState; }
@@ -276,7 +276,10 @@ public class NativeInput {
   static class MotionEvent extends InputEvent {
 
     // constants copied from android bionic/libc/include/math.h
+    @SuppressWarnings("FloatingPointLiteralPrecision")
     private static final double M_PI = 3.14159265358979323846f; /* pi */
+
+    @SuppressWarnings("FloatingPointLiteralPrecision")
     private static final double M_PI_2 = 1.57079632679489661923f; /* pi/2 */
 
     private int mAction;
@@ -294,6 +297,7 @@ public class NativeInput {
     private List<Long> mSampleEventTimes = new ArrayList<>();
     private List<NativeInput.PointerCoords> mSamplePointerCoords = new ArrayList<>();
 
+    @Override
     public int getType() {
       return AINPUT_EVENT_TYPE_MOTION;
     }
@@ -648,8 +652,8 @@ public class NativeInput {
       // and rawY for that point.
       float oldXOffset = mXOffset;
       float oldYOffset = mYOffset;
-      Ref<Float> newX = new Ref<>(0f);
-      Ref<Float> newY = new Ref<>(0f);
+      final Ref<Float> newX = new Ref<>(0f);
+      final Ref<Float> newY = new Ref<>(0f);
       float rawX = getRawX(0);
       float rawY = getRawY(0);
       transformPoint(matrix, rawX + oldXOffset, rawY + oldYOffset, newX, newY);
@@ -657,15 +661,15 @@ public class NativeInput {
       mYOffset = newY.get() - rawY;
       // Determine how the origin is transformed by the matrix so that we
       // can transform orientation vectors.
-      Ref<Float> originX = new Ref<>(0f);
-      Ref<Float> originY = new Ref<>(0f);
+      final Ref<Float> originX = new Ref<>(0f);
+      final Ref<Float> originY = new Ref<>(0f);
       transformPoint(matrix, 0, 0, originX, originY);
       // Apply the transformation to all samples.
       int numSamples = mSamplePointerCoords.size();
       for (int i = 0; i < numSamples; i++) {
         PointerCoords c = mSamplePointerCoords.get(i);
-        Ref<Float> x = new Ref<>(c.getAxisValue(AMOTION_EVENT_AXIS_X) + oldXOffset);
-        Ref<Float> y = new Ref<>(c.getAxisValue(AMOTION_EVENT_AXIS_Y) + oldYOffset);
+        final Ref<Float> x = new Ref<>(c.getAxisValue(AMOTION_EVENT_AXIS_X) + oldXOffset);
+        final Ref<Float> y = new Ref<>(c.getAxisValue(AMOTION_EVENT_AXIS_Y) + oldYOffset);
         transformPoint(matrix, x.get(), y.get(), x, y);
         c.setAxisValue(AMOTION_EVENT_AXIS_X, x.get() - mXOffset);
         c.setAxisValue(AMOTION_EVENT_AXIS_Y, y.get() - mYOffset);
@@ -694,8 +698,8 @@ public class NativeInput {
       checkState(matrix.length == 9);
       // ruct and transform a vector oriented at the specified clockwise angle from vertical.
       // Coordinate system: down is increasing Y, right is increasing X.
-      Ref<Float> x = new Ref<>((float) Math.sin(angleRadians));
-      Ref<Float> y = new Ref<>(-(float) Math.cos(angleRadians));
+      final Ref<Float> x = new Ref<>((float) Math.sin(angleRadians));
+      final Ref<Float> y = new Ref<>(-(float) Math.cos(angleRadians));
       transformPoint(matrix, x.get(), y.get(), x, y);
       x.set(x.get() - originX);
       y.set(y.get() - originY);

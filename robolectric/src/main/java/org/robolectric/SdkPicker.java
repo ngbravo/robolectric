@@ -7,7 +7,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 import javax.annotation.Nonnull;
@@ -15,48 +14,20 @@ import javax.annotation.Nullable;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.internal.ConfigUtils;
 import org.robolectric.internal.SdkConfig;
-import org.robolectric.manifest.AndroidManifest;
 
 public class SdkPicker {
   private final Set<SdkConfig> supportedSdks;
-  private final Properties properties;
+  private final Set<SdkConfig> enabledSdks;
   private final SdkConfig minSupportedSdk;
   private final SdkConfig maxSupportedSdk;
 
-  public SdkPicker() {
-    this(map(SdkConfig.getSupportedApis()), System.getProperties());
-  }
-
-  public SdkPicker(Properties properties, int... supportedSdks) {
-    this(map(supportedSdks), properties);
-  }
-
-  public SdkPicker(Collection<SdkConfig> supportedSdks, Properties properties) {
+  public SdkPicker(
+      @Nonnull Collection<SdkConfig> supportedSdks, @Nullable Collection<SdkConfig> enabledSdks) {
     TreeSet<SdkConfig> sdkConfigs = new TreeSet<>(supportedSdks);
     this.supportedSdks = sdkConfigs;
+    this.enabledSdks = enabledSdks == null ? null : new TreeSet<>(enabledSdks);
     minSupportedSdk = sdkConfigs.first();
     maxSupportedSdk = sdkConfigs.last();
-    this.properties = properties;
-  }
-
-  /**
-   * Enumerate the SDKs to be used for this test.
-   *
-   * @param config a {@link Config} specifying one or more SDKs
-   * @param appManifest the {@link AndroidManifest} for the test
-   * @return the list of candidate {@link SdkConfig}s.
-   * @since 3.2
-   * @deprecated Use {@link #selectSdks(Config, UsesSdk)} instead.
-   */
-  @Deprecated
-  @Nonnull
-  public List<SdkConfig> selectSdks(Config config, AndroidManifest appManifest) {
-    Set<SdkConfig> sdks = new TreeSet<>(configuredSdks(config, appManifest));
-    Set<SdkConfig> enabledSdks = enumerateEnabledSdks();
-    if (enabledSdks != null) {
-      sdks = Sets.intersection(sdks, enabledSdks);
-    }
-    return Lists.newArrayList(sdks);
   }
 
   /**
@@ -70,7 +41,6 @@ public class SdkPicker {
   @Nonnull
   public List<SdkConfig> selectSdks(Config config, UsesSdk usesSdk) {
     Set<SdkConfig> sdks = new TreeSet<>(configuredSdks(config, usesSdk));
-    Set<SdkConfig> enabledSdks = enumerateEnabledSdks();
     if (enabledSdks != null) {
       sdks = Sets.intersection(sdks, enabledSdks);
     }
@@ -78,23 +48,16 @@ public class SdkPicker {
   }
 
   @Nullable
-  protected Set<SdkConfig> enumerateEnabledSdks() {
-    String overrideSupportedApis = properties.getProperty("robolectric.enabledSdks");
-    if (overrideSupportedApis == null || overrideSupportedApis.isEmpty()) {
+  protected static Set<SdkConfig> enumerateEnabledSdks(String enabledSdks) {
+    if (enabledSdks == null || enabledSdks.isEmpty()) {
       return null;
     } else {
-      Set<SdkConfig> enabledSdks = new HashSet<>();
-      for (int sdk : ConfigUtils.parseSdkArrayProperty(overrideSupportedApis)) {
-        enabledSdks.add(new SdkConfig(sdk));
+      Set<SdkConfig> enabledSdkConfigs = new HashSet<>();
+      for (int sdk : ConfigUtils.parseSdkArrayProperty(enabledSdks)) {
+        enabledSdkConfigs.add(new SdkConfig(sdk));
       }
-      return enabledSdks;
+      return enabledSdkConfigs;
     }
-  }
-
-  /** @deprecated Use {@link #configuredSdks(Config, UsesSdk)} instead. */
-  @Deprecated
-  protected Set<SdkConfig> configuredSdks(Config config, AndroidManifest appManifest) {
-    return configuredSdks(config, (UsesSdk) appManifest);
   }
 
   protected Set<SdkConfig> configuredSdks(Config config, UsesSdk usesSdk) {
@@ -181,16 +144,7 @@ public class SdkPicker {
   }
 
   @Nonnull
-  private static List<SdkConfig> map(Collection<Integer> supportedSdks) {
-    ArrayList<SdkConfig> sdkConfigs = new ArrayList<>();
-    for (int supportedSdk : supportedSdks) {
-      sdkConfigs.add(new SdkConfig(supportedSdk));
-    }
-    return sdkConfigs;
-  }
-
-  @Nonnull
-  private static List<SdkConfig> map(int[] supportedSdks) {
+  static List<SdkConfig> map(int... supportedSdks) {
     ArrayList<SdkConfig> sdkConfigs = new ArrayList<>();
     for (int supportedSdk : supportedSdks) {
       sdkConfigs.add(new SdkConfig(supportedSdk));

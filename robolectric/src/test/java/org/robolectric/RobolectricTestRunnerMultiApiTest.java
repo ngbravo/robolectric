@@ -7,13 +7,13 @@ import static android.os.Build.VERSION_CODES.KITKAT;
 import static android.os.Build.VERSION_CODES.LOLLIPOP;
 import static android.os.Build.VERSION_CODES.LOLLIPOP_MR1;
 import static android.os.Build.VERSION_CODES.M;
-import static org.assertj.core.api.Assertions.assertThat;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 
 import android.os.Build;
+import com.google.common.collect.Range;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 import javax.annotation.Nonnull;
 import org.junit.After;
 import org.junit.Before;
@@ -26,6 +26,7 @@ import org.junit.runners.JUnit4;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.robolectric.annotation.Config;
+import org.robolectric.util.TestUtil;
 
 @RunWith(JUnit4.class)
 public class RobolectricTestRunnerMultiApiTest {
@@ -35,35 +36,35 @@ public class RobolectricTestRunnerMultiApiTest {
   };
 
   private RobolectricTestRunner runner;
-  private Properties properties;
   private RunNotifier runNotifier;
   private MyRunListener runListener;
 
   private int numSupportedApis;
   private SdkPicker sdkPicker;
   private String priorResourcesMode;
+  private String priorAlwaysInclude;
 
   @Before
   public void setUp() {
     numSupportedApis = APIS_FOR_TEST.length;
-    properties = new Properties();
 
     runListener = new MyRunListener();
     runNotifier = new RunNotifier();
     runNotifier.addListener(runListener);
-    sdkPicker = new SdkPicker(properties, APIS_FOR_TEST);
+    sdkPicker = new SdkPicker(SdkPicker.map(APIS_FOR_TEST), null);
 
     priorResourcesMode = System.getProperty("robolectric.resourcesMode");
     System.setProperty("robolectric.resourcesMode", "legacy");
+
+    priorAlwaysInclude = System.getProperty("robolectric.alwaysIncludeVariantMarkersInTestName");
+    System.clearProperty("robolectric.alwaysIncludeVariantMarkersInTestName");
   }
 
   @After
   public void tearDown() throws Exception {
-    if (priorResourcesMode == null) {
-      System.clearProperty("robolectric.resourcesMode");
-    } else {
-      System.setProperty("robolectric.resourcesMode", priorResourcesMode);
-    }
+    TestUtil.resetSystemProperty(
+        "robolectric.alwaysIncludeVariantMarkersInTestName", priorAlwaysInclude);
+    TestUtil.resetSystemProperty("robolectric.resourcesMode", priorResourcesMode);
   }
 
   @Test
@@ -93,7 +94,8 @@ public class RobolectricTestRunnerMultiApiTest {
 
   @Test
   public void withEnabledSdks_createChildrenForEachSupportedSdk() throws Throwable {
-    properties.setProperty("robolectric.enabledSdks", "16,17");
+    sdkPicker = new SdkPicker(SdkPicker.map(16, 17), null);
+
     runner = runnerOf(TestWithNoConfig.class);
     assertThat(runner.getChildren()).hasSize(2);
   }
@@ -236,7 +238,7 @@ public class RobolectricTestRunnerMultiApiTest {
   @Config(sdk = {JELLY_BEAN, LOLLIPOP})
   public static class TestClassConfigWithSdkGroup {
     @Test public void testShouldRunApi18() {
-      assertThat(Build.VERSION.SDK_INT).isIn(JELLY_BEAN, LOLLIPOP);
+      assertThat(Build.VERSION.SDK_INT).isIn(Range.closed(JELLY_BEAN, LOLLIPOP));
     }
   }
 
@@ -244,28 +246,28 @@ public class RobolectricTestRunnerMultiApiTest {
   public static class TestMethodConfigWithSdkGroup {
     @Config(sdk = {JELLY_BEAN, LOLLIPOP})
     @Test public void testShouldRunApi16() {
-      assertThat(Build.VERSION.SDK_INT).isIn(JELLY_BEAN, LOLLIPOP);
+      assertThat(Build.VERSION.SDK_INT).isIn(Range.closed(JELLY_BEAN, LOLLIPOP));
     }
   }
 
   @Config(minSdk = LOLLIPOP)
   public static class TestClassLollipopAndUp {
     @Test public void testSomeApiLevel() {
-      assertThat(Build.VERSION.SDK_INT).isGreaterThanOrEqualTo(LOLLIPOP);
+      assertThat(Build.VERSION.SDK_INT).isAtLeast(LOLLIPOP);
     }
   }
 
   @Config(maxSdk = LOLLIPOP)
   public static class TestClassUpToAndIncludingLollipop {
     @Test public void testSomeApiLevel() {
-      assertThat(Build.VERSION.SDK_INT).isLessThanOrEqualTo(LOLLIPOP);
+      assertThat(Build.VERSION.SDK_INT).isAtMost(LOLLIPOP);
     }
   }
 
   @Config(minSdk = JELLY_BEAN_MR2, maxSdk = LOLLIPOP)
   public static class TestClassBetweenJellyBeanMr2AndLollipop {
     @Test public void testSomeApiLevel() {
-      assertThat(Build.VERSION.SDK_INT).isBetween(JELLY_BEAN_MR2, LOLLIPOP);
+      assertThat(Build.VERSION.SDK_INT).isIn(Range.closed(JELLY_BEAN_MR2, LOLLIPOP));
     }
   }
 
@@ -273,7 +275,7 @@ public class RobolectricTestRunnerMultiApiTest {
   public static class TestMethodLollipopAndUp {
     @Config(minSdk = LOLLIPOP)
     @Test public void testSomeApiLevel() {
-      assertThat(Build.VERSION.SDK_INT).isGreaterThanOrEqualTo(LOLLIPOP);
+      assertThat(Build.VERSION.SDK_INT).isAtLeast(LOLLIPOP);
     }
   }
 
@@ -281,7 +283,7 @@ public class RobolectricTestRunnerMultiApiTest {
   public static class TestMethodUpToAndIncludingLollipop {
     @Config(maxSdk = LOLLIPOP)
     @Test public void testSomeApiLevel() {
-      assertThat(Build.VERSION.SDK_INT).isLessThanOrEqualTo(LOLLIPOP);
+      assertThat(Build.VERSION.SDK_INT).isAtMost(LOLLIPOP);
     }
   }
 
@@ -289,7 +291,7 @@ public class RobolectricTestRunnerMultiApiTest {
   public static class TestMethodBetweenJellyBeanMr2AndLollipop {
     @Config(minSdk = JELLY_BEAN_MR2, maxSdk = LOLLIPOP)
     @Test public void testSomeApiLevel() {
-      assertThat(Build.VERSION.SDK_INT).isBetween(JELLY_BEAN_MR2, LOLLIPOP);
+      assertThat(Build.VERSION.SDK_INT).isIn(Range.closed(JELLY_BEAN_MR2, LOLLIPOP));
     }
   }
 
@@ -305,14 +307,15 @@ public class RobolectricTestRunnerMultiApiTest {
   public static class TestMethodWithSdkAndMinMax {
     @Config(sdk = JELLY_BEAN, minSdk = KITKAT, maxSdk = LOLLIPOP)
     @Test public void testWithKitKatAndLollipop() {
-      assertThat(Build.VERSION.SDK_INT).isBetween(KITKAT, LOLLIPOP);
+      assertThat(Build.VERSION.SDK_INT).isIn(Range.closed(KITKAT, LOLLIPOP));
     }
   }
 
   private static List<Integer> apisFor(List<FrameworkMethod> children) {
     List<Integer> apis = new ArrayList<>();
     for (FrameworkMethod child : children) {
-      apis.add(((RobolectricTestRunner.RobolectricFrameworkMethod) child).sdkConfig.getApiLevel());
+      apis.add(
+          ((RobolectricTestRunner.RobolectricFrameworkMethod) child).sdkConfig.getApiLevel());
     }
     return apis;
   }

@@ -1,25 +1,31 @@
 package org.robolectric.shadows;
 
 import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
-import static org.assertj.core.api.Assertions.assertThat;
+import static com.google.common.truth.Truth.assertThat;
 
+import android.app.Application;
 import android.content.ContentResolver;
 import android.provider.Settings;
+import android.provider.Settings.Global;
+import android.provider.Settings.Secure;
 import android.text.format.DateFormat;
+import androidx.test.core.app.ApplicationProvider;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
-@RunWith(RobolectricTestRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class ShadowSettingsTest {
+
   private ContentResolver contentResolver;
+  private Application context;
 
   @Before
   public void setUp() throws Exception {
-    contentResolver = RuntimeEnvironment.application.getContentResolver();
+    context = ApplicationProvider.getApplicationContext();
+    contentResolver = context.getContentResolver();
   }
 
   @Test
@@ -91,12 +97,68 @@ public class ShadowSettingsTest {
   @Test
   public void testSet24HourMode_24() {
     ShadowSettings.set24HourTimeFormat(true);
-    assertThat(DateFormat.is24HourFormat(RuntimeEnvironment.application.getBaseContext())).isTrue();
+    assertThat(DateFormat.is24HourFormat(context.getBaseContext())).isTrue();
   }
 
   @Test
   public void testSet24HourMode_12() {
     ShadowSettings.set24HourTimeFormat(false);
-    assertThat(DateFormat.is24HourFormat(RuntimeEnvironment.application.getBaseContext())).isFalse();
+    assertThat(DateFormat.is24HourFormat(context.getBaseContext())).isFalse();
+  }
+
+  @Test
+  public void testSetAdbEnabled_settingsSecure_true() {
+    ShadowSettings.setAdbEnabled(true);
+    assertThat(Secure.getInt(context.getContentResolver(), Secure.ADB_ENABLED, 0)).isEqualTo(1);
+  }
+
+  @Test
+  public void testSetAdbEnabled_settingsSecure_false() {
+    ShadowSettings.setAdbEnabled(false);
+    assertThat(Secure.getInt(context.getContentResolver(), Secure.ADB_ENABLED, 1)).isEqualTo(0);
+  }
+
+  @Test
+  @Config(minSdk = JELLY_BEAN_MR1)
+  public void testSetAdbEnabled_sinceJBMR1_settingsGlobal_true() {
+    ShadowSettings.setAdbEnabled(true);
+    assertThat(Global.getInt(context.getContentResolver(), Global.ADB_ENABLED, 0)).isEqualTo(1);
+  }
+
+  @Test
+  @Config(minSdk = JELLY_BEAN_MR1)
+  public void testSetAdbEnabled_sinceJBMR1_settingsGlobal_false() {
+    ShadowSettings.setAdbEnabled(false);
+    assertThat(Global.getInt(context.getContentResolver(), Global.ADB_ENABLED, 1)).isEqualTo(0);
+  }
+
+  @Test
+  public void testSetInstallNonMarketApps_settingsSecure_true() {
+    ShadowSettings.setInstallNonMarketApps(true);
+    assertThat(Secure.getInt(context.getContentResolver(), Secure.INSTALL_NON_MARKET_APPS, 0))
+        .isEqualTo(1);
+  }
+
+  @Test
+  public void testSetInstallNonMarketApps_settingsSecure_false() {
+    ShadowSettings.setInstallNonMarketApps(false);
+    assertThat(Secure.getInt(context.getContentResolver(), Secure.INSTALL_NON_MARKET_APPS, 1))
+        .isEqualTo(0);
+  }
+
+  @Test
+  @Config(minSdk = JELLY_BEAN_MR1)
+  public void testSetInstallNonMarketApps_sinceJBMR1_settingsGlobal_true() {
+    ShadowSettings.setInstallNonMarketApps(true);
+    assertThat(Global.getInt(context.getContentResolver(), Global.INSTALL_NON_MARKET_APPS, 0))
+        .isEqualTo(1);
+  }
+
+  @Test
+  @Config(minSdk = JELLY_BEAN_MR1)
+  public void testSetInstallNonMarketApps_sinceJBMR1_settingsGlobal_false() {
+    ShadowSettings.setInstallNonMarketApps(false);
+    assertThat(Global.getInt(context.getContentResolver(), Global.INSTALL_NON_MARKET_APPS, 1))
+        .isEqualTo(0);
   }
 }

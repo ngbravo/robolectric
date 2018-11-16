@@ -5,33 +5,34 @@ import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.PendingIntent.FLAG_NO_CREATE;
 import static android.app.PendingIntent.FLAG_ONE_SHOT;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
-import static org.assertj.core.api.Assertions.assertThat;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 import static org.robolectric.Shadows.shadowOf;
 
 import android.app.Activity;
+import android.app.Application;
 import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import androidx.test.core.app.ApplicationProvider;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
-@RunWith(RobolectricTestRunner.class)
+@RunWith(AndroidJUnit4.class)
 public class ShadowPendingIntentTest {
 
   private Context context;
 
   @Before
   public void setUp() {
-    context = RuntimeEnvironment.application;
+    context = ApplicationProvider.getApplicationContext();
   }
 
   @Test
@@ -75,7 +76,8 @@ public class ShadowPendingIntentTest {
     assertThat(shadow.getSavedIntents()).isEqualTo(intents);
 
     pendingIntent.send();
-    ShadowApplication application = shadowOf(RuntimeEnvironment.application);
+    ShadowApplication application =
+        shadowOf((Application) ApplicationProvider.getApplicationContext());
     assertThat(application.getNextStartedActivity()).isEqualTo(intents[1]);
     assertThat(application.getNextStartedActivity()).isEqualTo(intents[0]);
   }
@@ -90,7 +92,8 @@ public class ShadowPendingIntentTest {
     assertThat(shadow.getSavedIntents()).isEqualTo(intents);
 
     pendingIntent.send();
-    ShadowApplication application = shadowOf(RuntimeEnvironment.application);
+    ShadowApplication application =
+        shadowOf((Application) ApplicationProvider.getApplicationContext());
     assertThat(application.getNextStartedActivity()).isEqualTo(intents[1]);
     assertThat(application.getNextStartedActivity()).isEqualTo(intents[0]);
   }
@@ -150,7 +153,7 @@ public class ShadowPendingIntentTest {
 
   @Test
   public void send_shouldFillInIntentData() throws Exception {
-    Intent intent = new Intent();
+    Intent intent = new Intent("action");
     Context context = Robolectric.setupActivity(Activity.class);
     PendingIntent pendingIntent = PendingIntent.getActivity(context, 99, intent, 100);
 
@@ -160,8 +163,31 @@ public class ShadowPendingIntentTest {
 
     Intent i = shadowOf(otherContext).getNextStartedActivity();
     assertThat(i).isNotNull();
-    assertThat(i).isSameAs(intent);
+    assertThat(i.filterEquals(intent)).isTrue(); // Ignore extras.
     assertThat(i.getIntExtra("TEST", -1)).isEqualTo(23);
+  }
+
+  @Test
+  public void send_shouldNotReusePreviouslyFilledInIntentData() throws Exception {
+    Intent intent = new Intent("action");
+    Context context = Robolectric.setupActivity(Activity.class);
+    PendingIntent pendingIntent = PendingIntent.getActivity(context, 99, intent, 100);
+
+    Activity otherContext = Robolectric.setupActivity(Activity.class);
+    Intent firstFillIntent = new Intent().putExtra("KEY1", 23).putExtra("KEY2", 24);
+    pendingIntent.send(otherContext, 0, firstFillIntent);
+
+    ShadowActivity shadowActivity = shadowOf(otherContext);
+    shadowActivity.clearNextStartedActivities();
+
+    Intent secondFillIntent = new Intent().putExtra("KEY1", 50);
+    pendingIntent.send(otherContext, 0, secondFillIntent);
+
+    Intent i = shadowActivity.getNextStartedActivity();
+    assertThat(i).isNotNull();
+    assertThat(i.filterEquals(intent)).isTrue(); // Ignore extras.
+    assertThat(i.getIntExtra("KEY1", -1)).isEqualTo(50);
+    assertThat(i.hasExtra("KEY2")).isFalse();
   }
 
   @Test
@@ -178,13 +204,39 @@ public class ShadowPendingIntentTest {
     ShadowActivity shadowActivity = shadowOf(otherContext);
     Intent second = shadowActivity.getNextStartedActivity();
     assertThat(second).isNotNull();
-    assertThat(second).isSameAs(intents[1]);
+    assertThat(second.filterEquals(intents[1])).isTrue(); // Ignore extras.
     assertThat(second.getIntExtra("TEST", -1)).isEqualTo(23);
 
     Intent first = shadowActivity.getNextStartedActivity();
     assertThat(first).isNotNull();
     assertThat(first).isSameAs(intents[0]);
     assertThat(first.hasExtra("TEST")).isFalse();
+  }
+
+  @Test
+  public void send_shouldNotUsePreviouslyFilledInLastIntentData() throws Exception {
+    Intent[] intents = {new Intent("first"), new Intent("second")};
+    Context context = Robolectric.setupActivity(Activity.class);
+    PendingIntent pendingIntent = PendingIntent.getActivities(context, 99, intents, 100);
+
+    Activity otherContext = Robolectric.setupActivity(Activity.class);
+    Intent firstFillIntent = new Intent();
+    firstFillIntent.putExtra("KEY1", 23);
+    firstFillIntent.putExtra("KEY2", 24);
+    pendingIntent.send(otherContext, 0, firstFillIntent);
+
+    ShadowActivity shadowActivity = shadowOf(otherContext);
+    shadowActivity.clearNextStartedActivities();
+
+    Intent secondFillIntent = new Intent();
+    secondFillIntent.putExtra("KEY1", 50);
+    pendingIntent.send(otherContext, 0, secondFillIntent);
+
+    Intent second = shadowActivity.getNextStartedActivity();
+    assertThat(second).isNotNull();
+    assertThat(second.filterEquals(intents[1])).isTrue(); // Ignore extras.
+    assertThat(second.getIntExtra("KEY1", -1)).isEqualTo(50);
+    assertThat(second.hasExtra("KEY2")).isFalse();
   }
 
   @Test
@@ -271,7 +323,7 @@ public class ShadowPendingIntentTest {
   @Test
   public void getActivities_withFlagNoCreate_shouldReturnExistingIntent() {
     Intent[] intents = {new Intent(Intent.ACTION_VIEW), new Intent(Intent.ACTION_PICK)};
-    PendingIntent.getActivities(RuntimeEnvironment.application, 99, intents, 100);
+    PendingIntent.getActivities(ApplicationProvider.getApplicationContext(), 99, intents, 100);
 
     Intent[] identicalIntents = {new Intent(Intent.ACTION_VIEW), new Intent(Intent.ACTION_PICK)};
     PendingIntent saved =
@@ -283,7 +335,7 @@ public class ShadowPendingIntentTest {
   @Test
   public void getActivities_withNoFlags_shouldReturnExistingIntent() {
     Intent[] intents = {new Intent(Intent.ACTION_VIEW), new Intent(Intent.ACTION_PICK)};
-    PendingIntent.getActivities(RuntimeEnvironment.application, 99, intents, 100);
+    PendingIntent.getActivities(ApplicationProvider.getApplicationContext(), 99, intents, 100);
 
     Intent[] identicalIntents = {new Intent(Intent.ACTION_VIEW), new Intent(Intent.ACTION_PICK)};
     PendingIntent saved = PendingIntent.getActivities(context, 99, identicalIntents, 0);
@@ -572,5 +624,20 @@ public class ShadowPendingIntentTest {
     shadowOf(pendingIntent).setCreatorPackage(fakePackage);
     assertThat(pendingIntent.getCreatorPackage()).isEqualTo(fakePackage);
     assertThat(pendingIntent.getTargetPackage()).isEqualTo(fakePackage);
+  }
+
+  @Test
+  public void testHashCode() {
+    Context ctx = ApplicationProvider.getApplicationContext();
+    PendingIntent pendingIntent1 = PendingIntent.getActivity(ctx, 99, new Intent("activity"), 100);
+
+    assertThat(pendingIntent1.hashCode())
+        .isEqualTo(PendingIntent.getActivity(ctx, 99, new Intent("activity"), 100).hashCode());
+
+    assertThat(pendingIntent1.hashCode())
+        .isNotEqualTo(PendingIntent.getActivity(ctx, 99, new Intent("activity2"), 100).hashCode());
+
+    assertThat(pendingIntent1.hashCode())
+        .isNotEqualTo(PendingIntent.getActivity(ctx, 999, new Intent("activity"), 100).hashCode());
   }
 }

@@ -17,16 +17,19 @@ import java.util.Map;
  */
 @SuppressWarnings(value = {"unchecked", "TypeParameterUnusedInFormals"})
 public class ReflectionHelpers {
-  public static final Map<String, Object> PRIMITIVE_RETURN_VALUES =
-      Collections.unmodifiableMap(new HashMap<String, Object>() {{
-        put("boolean", Boolean.FALSE);
-        put("int", 0);
-        put("long", (long) 0);
-        put("float", (float) 0);
-        put("double", (double) 0);
-        put("short", (short) 0);
-        put("byte", (byte) 0);
-      }});
+  private static final Map<String, Object> PRIMITIVE_RETURN_VALUES;
+
+  static {
+    HashMap<String, Object> map = new HashMap<>();
+    map.put("boolean", Boolean.FALSE);
+    map.put("int", 0);
+    map.put("long", (long) 0);
+    map.put("float", (float) 0);
+    map.put("double", (double) 0);
+    map.put("short", (short) 0);
+    map.put("byte", (byte) 0);
+    PRIMITIVE_RETURN_VALUES = Collections.unmodifiableMap(map);
+  }
 
   public static <T> T createNullProxy(Class<T> clazz) {
     return (T) Proxy.newProxyInstance(clazz.getClassLoader(),
@@ -34,6 +37,34 @@ public class ReflectionHelpers {
           @Override
           public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             return PRIMITIVE_RETURN_VALUES.get(method.getReturnType().getName());
+          }
+        });
+  }
+
+  /**
+   * Create a proxy for the given class which returns other deep proxies from all it's methods.
+   *
+   * <p>The returned object will be an instance of the given class, but all methods will return
+   * either the "default" value for primitives, or another deep proxy for non-primitive types.
+   *
+   * <p>This should be used rarely, for cases where we need to create deep proxies in order not
+   * to crash. The inner proxies are impossible to configure, so there is no way to create
+   * meaningful behavior from a deep proxy. It serves mainly to prevent Null Pointer Exceptions.
+   * @param clazz the class to provide a proxy instance of.
+   * @return a new "Deep Proxy" instance of the given class.
+   */
+  public static <T> T createDeepProxy(Class<T> clazz) {
+    return (T) Proxy.newProxyInstance(clazz.getClassLoader(),
+        new Class[] {clazz}, new InvocationHandler() {
+          @Override
+          public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            if (PRIMITIVE_RETURN_VALUES.containsKey(method.getReturnType().getName())) {
+              return PRIMITIVE_RETURN_VALUES.get(method.getReturnType().getName());
+            } else if (method.getReturnType() == Void.TYPE) {
+              return null;
+            } else {
+              return createDeepProxy(method.getReturnType());
+            }
           }
         });
   }

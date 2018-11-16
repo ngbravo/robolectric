@@ -1,11 +1,15 @@
 package org.robolectric.res.android;
 
-// transliterated from https://android.googlesource.com/platform/frameworks/base/+/android-7.1.1_r13/include/androidfw/ByteBucketArray.h
+// transliterated from https://android.googlesource.com/platform/frameworks/base/+/android-9.0.0_r12/libs/androidfw/include/androidfw/ByteBucketArray.h
 /**
  * Stores a sparsely populated array. Has a fixed size of 256
  * (number of entries that a byte can represent).
  */
 public abstract class ByteBucketArray<T> {
+  public ByteBucketArray(T mDefault) {
+    this.mDefault = mDefault;
+  }
+
   final int size() {
     return NUM_BUCKETS * BUCKET_SIZE;
   }
@@ -20,12 +24,13 @@ public abstract class ByteBucketArray<T> {
     }
 
 //    byte bucketIndex = static_cast<byte>(index) >> 4;
-    byte bucketIndex = (byte) (((byte) index) >> 4);
+    byte bucketIndex = (byte) (index >> 4);
     T[] bucket = (T[]) mBuckets[bucketIndex];
     if (bucket == null) {
       return mDefault;
     }
-    return bucket[0x0f & ((byte) index)];
+    T t = bucket[0x0f & ((byte) index)];
+    return t == null ? mDefault : t;
   }
 
   T editItemAt(int index) {

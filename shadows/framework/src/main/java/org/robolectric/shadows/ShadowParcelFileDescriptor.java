@@ -1,6 +1,5 @@
 package org.robolectric.shadows;
 
-import static org.robolectric.shadow.api.Shadow.directlyOn;
 import static org.robolectric.shadow.api.Shadow.invokeConstructor;
 import static org.robolectric.util.ReflectionHelpers.ClassParameter.from;
 
@@ -17,10 +16,13 @@ import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 import org.robolectric.annotation.RealObject;
 import org.robolectric.shadow.api.Shadow;
+import org.robolectric.util.ReflectionHelpers;
 
 @Implements(ParcelFileDescriptor.class)
 @SuppressLint("NewApi")
 public class ShadowParcelFileDescriptor {
+  // TODO: consider removing this shadow in favor of shadowing file operations at the libcore.os
+  // level
   private static final String PIPE_TMP_DIR = "ShadowParcelFileDescriptor";
   private static final String PIPE_FILE_NAME = "pipe";
   private RandomAccessFile file;
@@ -29,9 +31,9 @@ public class ShadowParcelFileDescriptor {
   private @RealObject ParcelFileDescriptor realObject;
 
   @Implementation
-  public void __constructor__(ParcelFileDescriptor wrapped) {
-    invokeConstructor(ParcelFileDescriptor.class, realObject,
-        from(ParcelFileDescriptor.class, wrapped));
+  protected void __constructor__(ParcelFileDescriptor wrapped) {
+    invokeConstructor(
+        ParcelFileDescriptor.class, realObject, from(ParcelFileDescriptor.class, wrapped));
     if (wrapped != null) {
       ShadowParcelFileDescriptor shadowParcelFileDescriptor = Shadow.extract(wrapped);
       this.file = shadowParcelFileDescriptor.file;
@@ -39,47 +41,61 @@ public class ShadowParcelFileDescriptor {
   }
 
   @Implementation
-  public static ParcelFileDescriptor open(File file, int mode) throws FileNotFoundException {
+  protected static ParcelFileDescriptor open(File file, int mode) throws FileNotFoundException {
     ParcelFileDescriptor pfd;
     try {
-      Constructor<ParcelFileDescriptor> constructor = ParcelFileDescriptor.class.getDeclaredConstructor(FileDescriptor.class);
+      Constructor<ParcelFileDescriptor> constructor =
+          ParcelFileDescriptor.class.getDeclaredConstructor(FileDescriptor.class);
       pfd = constructor.newInstance(new FileDescriptor());
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
     ShadowParcelFileDescriptor shadowParcelFileDescriptor = Shadow.extract(pfd);
-    shadowParcelFileDescriptor.file = new RandomAccessFile(file,
-        mode == ParcelFileDescriptor.MODE_READ_ONLY ? "r" : "rw");
+    shadowParcelFileDescriptor.file = new RandomAccessFile(file, getFileMode(mode));
     return pfd;
+  }
+
+  private static String getFileMode(int mode) {
+    if ((mode & ParcelFileDescriptor.MODE_CREATE) != 0) {
+      return "rw";
+    }
+    switch (mode & ParcelFileDescriptor.MODE_READ_WRITE) {
+      case ParcelFileDescriptor.MODE_READ_ONLY:
+        return "r";
+      case ParcelFileDescriptor.MODE_WRITE_ONLY:
+      case ParcelFileDescriptor.MODE_READ_WRITE:
+        return "rw";
+    }
+
+    // TODO: this probably should be an error that we reach here, but default to 'rw' for now
+    return "rw";
   }
 
   @Implementation
   protected static ParcelFileDescriptor[] createPipe() throws IOException {
-    File file = new File(RuntimeEnvironment.getTempDirectory().create(PIPE_TMP_DIR).toFile(), PIPE_FILE_NAME);
+    File file =
+        new File(
+            RuntimeEnvironment.getTempDirectory().create(PIPE_TMP_DIR).toFile(), PIPE_FILE_NAME);
     if (!file.createNewFile()) {
       throw new IOException("Cannot create pipe file: " + file.getAbsolutePath());
     }
     ParcelFileDescriptor readSide = open(file, ParcelFileDescriptor.MODE_READ_ONLY);
     ParcelFileDescriptor writeSide = open(file, ParcelFileDescriptor.MODE_READ_WRITE);
     file.deleteOnExit();
-    return new ParcelFileDescriptor[]{readSide, writeSide};
+    return new ParcelFileDescriptor[] {readSide, writeSide};
   }
 
   @Implementation
-  public FileDescriptor getFileDescriptor() {
-    if (RuntimeEnvironment.useLegacyResources()) {
-      try {
-        return file.getFD();
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
-    } else {
-      return directlyOn(realParcelFd, ParcelFileDescriptor.class, "getFileDescriptor");
+  protected FileDescriptor getFileDescriptor() {
+    try {
+      return file.getFD();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
   }
 
   @Implementation
-  public long getStatSize() {
+  protected long getStatSize() {
     try {
       return file.length();
     } catch (IOException e) {
@@ -87,18 +103,17 @@ public class ShadowParcelFileDescriptor {
     }
   }
 
-  /**
-   * Overrides framework to avoid call to {@link FileDescriptor#getInt() which does not exist on JVM.
-   *
-   * @return a fixed int (`0`)
-   */
   @Implementation
-  public int getFd() {
-    return 0;
+  protected int getFd() {
+    try {
+      return ReflectionHelpers.getField(file.getFD(), "fd");
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Implementation
-  public void close() throws IOException {
+  protected void close() throws IOException {
     file.close();
   }
 }
